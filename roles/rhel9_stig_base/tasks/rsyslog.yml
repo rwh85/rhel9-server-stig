@@ -1,0 +1,57 @@
+---
+# =============================================================================
+# Remote Syslog (TLS) — STIG V2R6
+# =============================================================================
+# Deploy-time variable: stig_rsyslog_remote_server
+# When set, configures TLS forwarding to a central syslog server.
+# Burns 5 rules: rsyslog_encrypt_offload_actionsendstreamdriverauthmode,
+#   rsyslog_encrypt_offload_actionsendstreamdrivermode,
+#   rsyslog_encrypt_offload_defaultnetstreamdriver,
+#   rsyslog_remote_access_monitoring, rsyslog_remote_loghost
+# =============================================================================
+
+- name: Remote syslog — skip if stig_rsyslog_remote_server not defined
+  ansible.builtin.debug:
+    msg: "stig_rsyslog_remote_server is empty — skipping remote syslog TLS configuration"
+  when: stig_rsyslog_remote_server | length == 0
+
+- name: Configure remote syslog with TLS
+  when: stig_rsyslog_remote_server | length > 0
+  block:
+    - name: Install rsyslog-gnutls for TLS transport
+      ansible.builtin.dnf:
+        name: rsyslog-gnutls
+        state: present
+
+    - name: Deploy rsyslog TLS remote forwarding config
+      ansible.builtin.copy:
+        content: |
+          # STIG — Remote syslog TLS forwarding
+          # Managed by Ansible — do not edit manually
+          #
+          # Satisfies:
+          #   rsyslog_encrypt_offload_defaultnetstreamdriver
+          #   rsyslog_encrypt_offload_actionsendstreamdrivermode
+          #   rsyslog_encrypt_offload_actionsendstreamdriverauthmode
+          #   rsyslog_remote_access_monitoring
+          #   rsyslog_remote_loghost
+
+          # TLS driver
+          global(DefaultNetstreamDriver="gtls")
+
+          # Forward all logs to remote server over TLS
+          action(
+            type="omfwd"
+            target="{{ stig_rsyslog_remote_server }}"
+            port="{{ stig_rsyslog_port }}"
+            protocol="{{ stig_rsyslog_protocol }}"
+            StreamDriver="gtls"
+            StreamDriverMode="1"
+            StreamDriverAuthMode="x509/name"
+            StreamDriverPermittedPeer="{{ stig_rsyslog_remote_server }}"
+          )
+        dest: /etc/rsyslog.d/99-remote.conf
+        owner: root
+        group: root
+        mode: "0644"
+      notify: restart rsyslog

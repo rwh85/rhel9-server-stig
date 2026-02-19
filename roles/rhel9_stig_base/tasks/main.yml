@@ -1,0 +1,23 @@
+---
+# =============================================================================
+# RHEL 9 Server STIG Base — Headless Hardening
+# =============================================================================
+# Adapted from rhel9-desktop-stig, with NO dconf/GNOME/browser tasks.
+# SCAP profile: stig (not stig_gui)
+# =============================================================================
+
+- import_tasks: packages.yml
+- import_tasks: kernel_parameters.yml
+- import_tasks: file_permissions.yml
+- import_tasks: account_management.yml
+- import_tasks: authentication.yml
+- import_tasks: audit_logging.yml
+- import_tasks: network.yml
+- import_tasks: misc_hardening.yml
+- import_tasks: services.yml
+- import_tasks: rsyslog.yml
+- import_tasks: chrony.yml
+- import_tasks: dns.yml
+- import_tasks: grub_password.yml
+- import_tasks: smartcard.yml
+- import_tasks: fips.yml

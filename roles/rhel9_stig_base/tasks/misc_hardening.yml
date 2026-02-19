@@ -1,0 +1,260 @@
+---
+# =============================================================================
+# Miscellaneous Hardening — STIG (Server/Headless)
+# =============================================================================
+
+# --- Ctrl-Alt-Del ---
+
+- name: Mask ctrl-alt-del.target
+  ansible.builtin.systemd:
+    name: ctrl-alt-del.target
+    masked: true
+
+- name: Set CtrlAltDelBurstAction=none in system.conf
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/system.conf
+    regexp: '^(#\s*)?CtrlAltDelBurstAction='
+    line: "CtrlAltDelBurstAction=none"
+    state: present
+
+# --- Idle Session Timeout ---
+
+- name: Set StopIdleSessionSec in logind.conf
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/logind.conf
+    regexp: '^(#\s*)?StopIdleSessionSec='
+    line: "StopIdleSessionSec=900"
+    state: present
+
+- name: Deploy shell TMOUT via profile.d
+  ansible.builtin.copy:
+    content: |
+      # STIG — Shell session timeout (15 minutes)
+      TMOUT=900
+      export TMOUT
+      readonly TMOUT
+    dest: /etc/profile.d/stig-timeout.sh
+    owner: root
+    group: root
+    mode: "0644"
+
+# --- Sudo ---
+
+- name: Remove !authenticate from sudoers drop-ins
+  ansible.builtin.shell:
+    cmd: >-
+      find /etc/sudoers.d/ -type f -exec
+      sed -i 's/!authenticate//g' {} \;
+  changed_when: false
+  failed_when: false
+
+- name: Ensure sudo has timestamp_timeout set
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/stig-timeout
+    regexp: '^Defaults\s+timestamp_timeout'
+    line: "Defaults timestamp_timeout=5"
+    state: present
+    create: true
+    owner: root
+    group: root
+    mode: "0440"
+    validate: "visudo -cf %s"
+
+- name: Ensure !targetpw in sudoers
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/stig-security
+    regexp: '^Defaults\s+!targetpw'
+    line: "Defaults !targetpw"
+    state: present
+    create: true
+    owner: root
+    group: root
+    mode: "0440"
+    validate: "visudo -cf %s"
+
+- name: Ensure !rootpw in sudoers
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/stig-security
+    regexp: '^Defaults\s+!rootpw'
+    line: "Defaults !rootpw"
+    state: present
+    validate: "visudo -cf %s"
+
+- name: Ensure use_pty in sudoers
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/stig-security
+    regexp: '^Defaults\s+use_pty'
+    line: "Defaults use_pty"
+    state: present
+    validate: "visudo -cf %s"
+
+# --- Restrict su ---
+
+- name: Ensure pam_wheel.so is required for su
+  ansible.builtin.lineinfile:
+    path: /etc/pam.d/su
+    regexp: '^#?\s*auth\s+required\s+pam_wheel\.so'
+    line: "auth           required        pam_wheel.so use_uid"
+    state: present
+
+# --- Login Defs ---
+
+- name: Set FAIL_DELAY in login.defs
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    regexp: '^(#\s*)?FAIL_DELAY'
+    line: "FAIL_DELAY 4"
+    state: present
+
+- name: Set CREATE_HOME in login.defs
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    regexp: '^(#\s*)?CREATE_HOME'
+    line: "CREATE_HOME yes"
+    state: present
+
+# --- Umask ---
+
+- name: Set umask 077 in /etc/bashrc
+  ansible.builtin.lineinfile:
+    path: /etc/bashrc
+    regexp: '^\s*umask\s+'
+    line: "    umask 077"
+    state: present
+
+- name: Set umask 077 in /etc/profile
+  ansible.builtin.lineinfile:
+    path: /etc/profile
+    regexp: '^\s*umask\s+'
+    line: "    umask 077"
+    state: present
+
+# --- Max Concurrent Sessions ---
+
+- name: Set max concurrent login sessions
+  ansible.builtin.copy:
+    content: |
+      # STIG — Limit concurrent login sessions
+      * hard maxlogins 10
+    dest: /etc/security/limits.d/99-stig-maxlogins.conf
+    owner: root
+    group: root
+    mode: "0644"
+
+# --- Root Dotfile Permissions ---
+
+- name: Find root home dotfiles
+  ansible.builtin.find:
+    paths: /root
+    patterns: ".*"
+    hidden: true
+    file_type: file
+  register: _root_dotfiles
+
+- name: Fix root dotfile permissions to 600
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    mode: "0600"
+  loop: "{{ _root_dotfiles.files }}"
+  when: _root_dotfiles.files | length > 0
+
+# --- Password Aging for Existing Users ---
+
+- name: Get list of human users (UID >= 1000)
+  ansible.builtin.shell:
+    cmd: "awk -F: '$3 >= 1000 && $1 != \"nobody\" {print $1}' /etc/passwd"
+  register: _human_users
+  changed_when: false
+
+- name: Set max password age for existing users
+  ansible.builtin.command:
+    cmd: "chage --maxdays {{ cypher_password_max_days }} {{ item }}"
+  loop: "{{ _human_users.stdout_lines }}"
+  changed_when: true
+  when: _human_users.stdout_lines | length > 0
+
+- name: Set min password age for existing users
+  ansible.builtin.command:
+    cmd: "chage --mindays {{ cypher_password_min_days }} {{ item }}"
+  loop: "{{ _human_users.stdout_lines }}"
+  changed_when: true
+  when: _human_users.stdout_lines | length > 0
+
+# --- Postfix ---
+
+- name: Set root mail alias in /etc/aliases
+  ansible.builtin.lineinfile:
+    path: /etc/aliases
+    regexp: '^root:'
+    line: "root:\t\tstigadmin"
+    state: present
+  notify: rebuild aliases
+
+- name: Prevent postfix unrestricted relay
+  ansible.builtin.lineinfile:
+    path: /etc/postfix/main.cf
+    regexp: '^smtpd_client_restrictions\s*='
+    line: "smtpd_client_restrictions = permit_mynetworks,reject"
+    state: present
+  failed_when: false
+
+# --- USBGuard ---
+
+- name: Set USBGuard AuditBackend to LinuxAudit
+  ansible.builtin.lineinfile:
+    path: /etc/usbguard/usbguard-daemon.conf
+    regexp: '^(#\s*)?AuditBackend\s*='
+    line: "AuditBackend=LinuxAudit"
+    state: present
+  failed_when: false
+
+# --- fapolicyd ---
+
+- name: Check if fapolicyd is installed
+  ansible.builtin.command:
+    cmd: rpm -q fapolicyd
+  register: _fapolicyd_check
+  changed_when: false
+  failed_when: false
+
+- name: Ensure fapolicyd has permissive=0
+  ansible.builtin.lineinfile:
+    path: /etc/fapolicyd/fapolicyd.conf
+    regexp: '^(#\s*)?permissive\s*='
+    line: "permissive = 0"
+    state: present
+  when: _fapolicyd_check.rc == 0
+
+# --- AIDE Enhancements ---
+
+- name: Add audit tools to AIDE config
+  ansible.builtin.blockinfile:
+    path: /etc/aide.conf
+    marker: "# {mark} STIG AUDIT TOOLS"
+    block: |
+      /usr/sbin/auditctl p+i+n+u+g+s+b+acl+xattrs+sha512
+      /usr/sbin/auditd p+i+n+u+g+s+b+acl+xattrs+sha512
+      /usr/sbin/ausearch p+i+n+u+g+s+b+acl+xattrs+sha512
+      /usr/sbin/aureport p+i+n+u+g+s+b+acl+xattrs+sha512
+      /usr/sbin/autrace p+i+n+u+g+s+b+acl+xattrs+sha512
+      /usr/sbin/augenrules p+i+n+u+g+s+b+acl+xattrs+sha512
+    state: present
+  when: cypher_aide_enabled | bool
+
+- name: Configure AIDE to use FIPS hashes only
+  ansible.builtin.lineinfile:
+    path: /etc/aide.conf
+    regexp: '^(#\s*)?FIPSR\s*='
+    line: "FIPSR = p+i+n+u+g+s+b+acl+xattrs+sha256+sha512"
+    state: present
+  when: cypher_aide_enabled | bool
+
+- name: Configure AIDE daily scan with notification
+  ansible.builtin.cron:
+    name: "AIDE integrity check with notification"
+    minute: "5"
+    hour: "4"
+    job: "/usr/sbin/aide --check 2>&1 | /usr/bin/logger -t aide-check"
+    user: root
+    cron_file: cypher-aide-check
+  when: cypher_aide_enabled | bool

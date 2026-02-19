@@ -1,0 +1,211 @@
+---
+# =============================================================================
+# RHEL 9 Server STIG — Group Variables
+# =============================================================================
+# All toggle variables and deploy-time settings with defaults.
+# Override per-host or per-group as needed.
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Role Toggles
+# ---------------------------------------------------------------------------
+# Each server role can be independently enabled/disabled.
+
+server_rpm_mirror_enabled: true
+server_ntp_enabled: true
+server_docker_enabled: true
+server_ansible_node_enabled: true
+
+# ---------------------------------------------------------------------------
+# Deploy-Time Variables
+# ---------------------------------------------------------------------------
+# These values are environment-specific and MUST be set at deploy time.
+# Empty defaults mean the feature is skipped (not configured).
+
+# Central Syslog Server
+stig_rsyslog_remote_server: ""
+stig_rsyslog_port: "514"
+stig_rsyslog_protocol: "tcp"
+
+# NTP/Chrony Servers (client mode in base role)
+stig_chrony_servers: []
+stig_chrony_maxpoll: 16
+
+# NTP Server — networks allowed to query this server
+stig_ntp_allow_networks:
+  - "192.168.0.0/16"
+
+# DNS Servers
+stig_dns_servers: []
+stig_dns_search_domain: ""
+
+# GRUB Bootloader Password (CAT I)
+# Generate: grub2-mkpasswd-pbkdf2
+stig_grub_password_hash: ""
+stig_grub_superuser: "root"
+
+# Smartcard / CAC Authentication
+# false = IDAM (username/password)
+stig_smartcard_auth: false
+
+# ---------------------------------------------------------------------------
+# Cryptography & Encryption
+# ---------------------------------------------------------------------------
+
+cypher_fips_enabled: true
+cypher_luks_required: true
+
+# ---------------------------------------------------------------------------
+# Authentication
+# ---------------------------------------------------------------------------
+
+cypher_password_auth: true
+cypher_password_min_length: 15
+cypher_password_min_uppercase: 1
+cypher_password_min_lowercase: 1
+cypher_password_min_digits: 1
+cypher_password_min_special: 1
+cypher_password_max_repeats: 3
+cypher_password_history: 5
+cypher_password_max_days: 60
+cypher_password_min_days: 1
+
+# Account lockout
+cypher_lockout_attempts: 3
+cypher_lockout_time: 900              # 15 min unlock (NOT 0 — permanent lockout is hostile)
+cypher_lockout_interval: 900
+
+# ---------------------------------------------------------------------------
+# Access Control
+# ---------------------------------------------------------------------------
+
+cypher_selinux_mode: enforcing
+cypher_selinux_policy: targeted
+cypher_usb_policy: deny_all
+cypher_wireless_disabled: true
+cypher_bluetooth_disabled: true
+
+# ---------------------------------------------------------------------------
+# Auditing & Integrity
+# ---------------------------------------------------------------------------
+
+cypher_auditd_immutable: true
+cypher_auditd_max_log_file: 25
+cypher_auditd_num_logs: 10
+cypher_auditd_space_left_action: email
+cypher_auditd_admin_space_left_action: halt
+cypher_aide_enabled: true
+cypher_remote_syslog_enabled: true
+cypher_remote_syslog_server: ""
+
+# ---------------------------------------------------------------------------
+# Boot & Physical Security
+# ---------------------------------------------------------------------------
+
+cypher_grub_password_required: true
+
+# ---------------------------------------------------------------------------
+# Network & Firewall
+# ---------------------------------------------------------------------------
+
+cypher_firewalld_enabled: true
+cypher_firewalld_default_zone: drop
+
+# SSH hardening
+cypher_ssh_permit_root: "no"
+cypher_ssh_max_auth_tries: 4
+cypher_ssh_client_alive_interval: 600
+cypher_ssh_client_alive_count: 1
+cypher_ssh_banner: /etc/issue
+cypher_ssh_ciphers: "aes256-gcm@openssh.com,aes256-ctr,aes128-gcm@openssh.com"
+cypher_ssh_macs: "hmac-sha2-512,hmac-sha2-256"
+cypher_ssh_kex: "ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group14-sha256,diffie-hellman-group16-sha512"
+
+# SSH admin user
+cypher_ssh_admin_user: stigadmin
+cypher_ssh_admin_password: "{{ cypher_test_password | default('Ch@ng3M3!ST1G2024') }}"
+
+# Kernel network hardening
+cypher_sysctl_ip_forward: 0
+cypher_sysctl_send_redirects: 0
+cypher_sysctl_accept_redirects: 0
+cypher_sysctl_accept_source_route: 0
+cypher_sysctl_log_martians: 1
+cypher_sysctl_rp_filter: 1
+cypher_sysctl_tcp_syncookies: 1
+
+# ---------------------------------------------------------------------------
+# Login Banners
+# ---------------------------------------------------------------------------
+
+cypher_banner_text: |
+  You are accessing a U.S. Government (USG) Information System (IS) that is provided for USG-authorized use only.
+  By using this IS (which includes any device attached to this IS), you consent to the following conditions:
+  -The USG routinely intercepts and monitors communications on this IS for purposes including, but not limited to, penetration testing, COMSEC monitoring, network operations and defense, personnel misconduct (PM), law enforcement (LE), and counterintelligence (CI) investigations.
+  -At any time, the USG may inspect and seize data stored on this IS.
+  -Communications using, or data stored on, this IS are not private, are subject to routine monitoring, interception, and search, and may be disclosed or used for any USG-authorized purpose.
+  -This IS includes security measures (e.g., authentication and access controls) to protect USG interests--not for your personal benefit or privacy.
+  -Notwithstanding the above, using this IS does not constitute consent to PM, LE or CI investigative searching or monitoring of the content of privileged communications, or work product, related to personal representation or services by attorneys, psychotherapists, or clergy, and their assistants. Such communications and work product are private and confidential. See User Agreement for details.
+
+# ---------------------------------------------------------------------------
+# Package Management
+# ---------------------------------------------------------------------------
+
+cypher_packages_remove:
+  - telnet
+  - rsh
+  - tftp
+  - vsftpd
+  - gssproxy
+  - nfs-utils
+  - sendmail
+  - iprutils
+  - tuned
+
+cypher_packages_install:
+  - aide
+  - audispd-plugins
+  - firewalld
+  - openscap-scanner
+  - scap-security-guide
+  - tmux
+  - usbguard
+  - chrony
+  - rsyslog
+  - fapolicyd
+
+# ---------------------------------------------------------------------------
+# RPM Mirror Role
+# ---------------------------------------------------------------------------
+
+rpm_mirror_base_path: /var/repos
+rpm_mirror_repos:
+  - name: baseos
+    path: /var/repos/rhel9/BaseOS
+  - name: appstream
+    path: /var/repos/rhel9/AppStream
+  - name: extras
+    path: /var/repos/rhel9/extras
+rpm_mirror_server_name: "{{ ansible_fqdn }}"
+rpm_mirror_http_port: 80
+rpm_mirror_https_port: 443
+
+# ---------------------------------------------------------------------------
+# Docker Role
+# ---------------------------------------------------------------------------
+
+docker_firewall_ports:
+  - "2376/tcp"
+docker_storage_driver: overlay2
+docker_log_driver: journald
+docker_log_max_size: "10m"
+docker_log_max_file: "3"
+docker_registry_mirror: ""
+
+# ---------------------------------------------------------------------------
+# Ansible Node Role
+# ---------------------------------------------------------------------------
+
+ansible_node_user: ansible
+ansible_node_ee_image: "ghcr.io/rwh85/ansible-execution-env:latest"
+ansible_node_local_registry: ""

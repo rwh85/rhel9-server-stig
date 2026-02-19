@@ -1,0 +1,32 @@
+---
+# =============================================================================
+# Chrony / NTP — STIG V2R6
+# =============================================================================
+# Deploy-time variable: stig_chrony_servers
+# When set, configures chrony with specific NTP servers + maxpoll.
+# Burns 2 rules: chronyd_or_ntpd_set_maxpoll, chronyd_server_directive
+# =============================================================================
+
+- name: Chrony — skip server config if stig_chrony_servers is empty
+  ansible.builtin.debug:
+    msg: "stig_chrony_servers is empty — skipping chrony server configuration"
+  when: stig_chrony_servers | length == 0
+
+- name: Configure chrony NTP servers
+  when: stig_chrony_servers | length > 0
+  block:
+    - name: Deploy STIG-compliant chrony.conf
+      ansible.builtin.template:
+        src: chrony.conf.j2
+        dest: /etc/chrony.conf
+        owner: root
+        group: root
+        mode: "0644"
+        backup: true
+      notify: restart chronyd
+
+    - name: Ensure chronyd is enabled and running
+      ansible.builtin.service:
+        name: chronyd
+        state: started
+        enabled: true

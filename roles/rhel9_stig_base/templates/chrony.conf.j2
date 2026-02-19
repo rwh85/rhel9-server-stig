@@ -1,0 +1,23 @@
+# {{ ansible_managed }}
+# STIG-compliant chrony configuration
+# Satisfies: chronyd_or_ntpd_set_maxpoll, chronyd_server_directive
+
+{% for server in stig_chrony_servers %}
+server {{ server }} iburst maxpoll {{ stig_chrony_maxpoll }}
+{% endfor %}
+
+# Record the rate at which the system clock gains/losses time
+driftfile /var/lib/chrony/drift
+
+# Allow the system clock to be stepped in the first three updates
+makestep 1.0 3
+
+# Enable kernel synchronization of the real-time clock (RTC)
+rtcsync
+
+# Disable NTP server mode (STIG hardening)
+port 0
+cmdport 0
+
+# Specify directory for log files
+logdir /var/log/chrony

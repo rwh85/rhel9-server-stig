@@ -1,0 +1,5 @@
+[servers]
+rhel9-server-01 ansible_host=192.168.1.x ansible_user=root
+
+[servers:vars]
+ansible_python_interpreter=/usr/bin/python3

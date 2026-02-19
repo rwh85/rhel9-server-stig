@@ -1,0 +1,67 @@
+---
+# =============================================================================
+# Ansible Control Node
+# =============================================================================
+
+- name: Install ansible-core
+  ansible.builtin.dnf:
+    name:
+      - ansible-core
+      - python3-pip
+      - git
+    state: present
+
+- name: Create ansible user
+  ansible.builtin.user:
+    name: "{{ ansible_node_user }}"
+    comment: "Ansible automation user"
+    shell: /bin/bash
+    create_home: true
+    state: present
+
+- name: Create .ssh directory for ansible user
+  ansible.builtin.file:
+    path: "/home/{{ ansible_node_user }}/.ssh"
+    state: directory
+    owner: "{{ ansible_node_user }}"
+    group: "{{ ansible_node_user }}"
+    mode: "0700"
+
+- name: Generate SSH key pair for ansible user
+  ansible.builtin.command:
+    cmd: >-
+      ssh-keygen -t ed25519 -f /home/{{ ansible_node_user }}/.ssh/id_ed25519
+      -N "" -C "{{ ansible_node_user }}@{{ ansible_hostname }}"
+    creates: "/home/{{ ansible_node_user }}/.ssh/id_ed25519"
+  become_user: "{{ ansible_node_user }}"
+
+- name: Deploy ansible.cfg
+  ansible.builtin.template:
+    src: ansible.cfg.j2
+    dest: /etc/ansible/ansible.cfg
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Create /etc/ansible directory
+  ansible.builtin.file:
+    path: /etc/ansible
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Add ansible user to wheel group for sudo
+  ansible.builtin.user:
+    name: "{{ ansible_node_user }}"
+    groups: wheel
+    append: true
+
+- name: Pull execution environment image (if Docker available)
+  ansible.builtin.command:
+    cmd: >-
+      docker pull {{ ansible_node_local_registry | default(ansible_node_ee_image, true) }}
+  register: _ee_pull
+  changed_when: "'Downloaded newer image' in _ee_pull.stdout"
+  failed_when: false
+  when: server_docker_enabled | default(true) | bool

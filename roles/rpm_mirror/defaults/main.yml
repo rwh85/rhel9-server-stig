@@ -1,0 +1,3 @@
+---
+# Defaults defined in inventory/group_vars/all.yml
+server_rpm_mirror_enabled: true

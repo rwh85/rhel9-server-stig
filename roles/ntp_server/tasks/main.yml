@@ -1,0 +1,31 @@
+---
+# =============================================================================
+# NTP Server — Chrony Server Mode
+# =============================================================================
+# Configures chrony to serve time to client networks.
+# Overrides the base role's client-only chrony config.
+# =============================================================================
+
+- name: Deploy chrony server configuration
+  ansible.builtin.template:
+    src: chrony-server.conf.j2
+    dest: /etc/chrony.conf
+    owner: root
+    group: root
+    mode: "0644"
+    backup: true
+  notify: restart chronyd
+
+- name: Ensure chronyd is enabled and running
+  ansible.builtin.service:
+    name: chronyd
+    state: started
+    enabled: true
+
+- name: Allow NTP (UDP 123) in firewall
+  ansible.posix.firewalld:
+    service: ntp
+    permanent: true
+    immediate: true
+    state: enabled
+  when: cypher_firewalld_enabled | default(true) | bool

@@ -1,0 +1,347 @@
+---
+# =============================================================================
+# Authentication — STIG V2R6 (Server/Headless)
+# =============================================================================
+# Key difference: unlock_time = 900 (15 min), NOT 0 (permanent).
+# Permanent lockout is operationally hostile on headless servers.
+# =============================================================================
+
+# --- Password Complexity (pwquality.conf) ---
+
+- name: Set password minimum length (V-257874)
+  ansible.builtin.lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: '^(#\s*)?minlen\s*='
+    line: "minlen = {{ cypher_password_min_length }}"
+    state: present
+  when: cypher_password_auth | bool
+
+- name: Set password minimum uppercase characters (V-257875)
+  ansible.builtin.lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: '^(#\s*)?ucredit\s*='
+    line: "ucredit = -{{ cypher_password_min_uppercase }}"
+    state: present
+  when: cypher_password_auth | bool
+
+- name: Set password minimum lowercase characters (V-257876)
+  ansible.builtin.lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: '^(#\s*)?lcredit\s*='
+    line: "lcredit = -{{ cypher_password_min_lowercase }}"
+    state: present
+  when: cypher_password_auth | bool
+
+- name: Set password minimum digit characters (V-257877)
+  ansible.builtin.lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: '^(#\s*)?dcredit\s*='
+    line: "dcredit = -{{ cypher_password_min_digits }}"
+    state: present
+  when: cypher_password_auth | bool
+
+- name: Set password minimum special characters (V-257878)
+  ansible.builtin.lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: '^(#\s*)?ocredit\s*='
+    line: "ocredit = -{{ cypher_password_min_special }}"
+    state: present
+  when: cypher_password_auth | bool
+
+- name: Set password maximum consecutive repeating characters (V-257879)
+  ansible.builtin.lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: '^(#\s*)?maxrepeat\s*='
+    line: "maxrepeat = {{ cypher_password_max_repeats }}"
+    state: present
+  when: cypher_password_auth | bool
+
+- name: Set password maximum consecutive same-class characters (V-257879)
+  ansible.builtin.lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: '^(#\s*)?maxclassrepeat\s*='
+    line: "maxclassrepeat = 4"
+    state: present
+  when: cypher_password_auth | bool
+
+- name: Enable dictionary check for passwords (V-257880)
+  ansible.builtin.lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: '^(#\s*)?dictcheck\s*='
+    line: "dictcheck = 1"
+    state: present
+  when: cypher_password_auth | bool
+
+# --- Password Encryption ---
+
+- name: Ensure SHA-512 password encryption in login.defs
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    regexp: '^ENCRYPT_METHOD'
+    line: "ENCRYPT_METHOD SHA512"
+    state: present
+
+# --- Password History ---
+
+- name: Set password history depth (V-257873)
+  ansible.builtin.lineinfile:
+    path: /etc/security/pwhistory.conf
+    regexp: '^(#\s*)?remember\s*='
+    line: "remember = {{ cypher_password_history }}"
+    state: present
+    create: true
+    owner: root
+    group: root
+    mode: "0644"
+  when: cypher_password_auth | bool
+
+# --- Password Aging ---
+
+- name: Set maximum password age (V-257871)
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    regexp: '^PASS_MAX_DAYS'
+    line: "PASS_MAX_DAYS\t{{ cypher_password_max_days }}"
+    state: present
+  when: cypher_password_auth | bool
+
+- name: Set minimum password age (V-257872)
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    regexp: '^PASS_MIN_DAYS'
+    line: "PASS_MIN_DAYS\t{{ cypher_password_min_days }}"
+    state: present
+  when: cypher_password_auth | bool
+
+# --- Additional pwquality ---
+
+- name: Set password difok (minimum changed characters)
+  ansible.builtin.lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: '^(#\s*)?difok\s*='
+    line: "difok = 8"
+    state: present
+  when: cypher_password_auth | bool
+
+- name: Enforce password complexity for root
+  ansible.builtin.lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: '^(#\s*)?enforce_for_root'
+    line: "enforce_for_root"
+    state: present
+  when: cypher_password_auth | bool
+
+- name: Set minimum character classes
+  ansible.builtin.lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: '^(#\s*)?minclass\s*='
+    line: "minclass = 4"
+    state: present
+  when: cypher_password_auth | bool
+
+- name: Set password retry limit
+  ansible.builtin.lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: '^(#\s*)?retry\s*='
+    line: "retry = 3"
+    state: present
+  when: cypher_password_auth | bool
+
+# --- login.defs additions ---
+
+- name: Set SHA_CRYPT_MIN_ROUNDS in login.defs
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    regexp: '^(#\s*)?SHA_CRYPT_MIN_ROUNDS'
+    line: "SHA_CRYPT_MIN_ROUNDS 5000"
+    state: present
+
+# --- libuser.conf ---
+
+- name: Ensure libuser.conf uses sha512
+  ansible.builtin.lineinfile:
+    path: /etc/libuser.conf
+    regexp: '^(#\s*)?crypt_style\s*='
+    line: "crypt_style = sha512"
+    insertafter: '^\[defaults\]'
+    state: present
+    create: true
+    owner: root
+    group: root
+    mode: "0644"
+
+# --- Remove nullok from PAM ---
+
+- name: Remove nullok from system-auth
+  ansible.builtin.replace:
+    path: /etc/pam.d/system-auth
+    regexp: '\s+nullok'
+    replace: ''
+
+- name: Remove nullok from password-auth
+  ansible.builtin.replace:
+    path: /etc/pam.d/password-auth
+    regexp: '\s+nullok'
+    replace: ''
+
+# --- PAM SHA512 rounds ---
+
+- name: Ensure SHA512 rounds in system-auth
+  ansible.builtin.replace:
+    path: /etc/pam.d/system-auth
+    regexp: '(pam_unix\.so.*?)(\s+rounds=\d+)?(\s)'
+    replace: '\1 rounds=5000\3'
+
+- name: Ensure SHA512 rounds in password-auth
+  ansible.builtin.replace:
+    path: /etc/pam.d/password-auth
+    regexp: '(pam_unix\.so.*?)(\s+rounds=\d+)?(\s)'
+    replace: '\1 rounds=5000\3'
+
+# --- PAM authselect with faillock ---
+
+- name: Enable authselect with faillock
+  ansible.builtin.command:
+    cmd: authselect select sssd with-faillock --force
+  register: _authselect_result
+  changed_when: "'Profile changed' in _authselect_result.stdout or _authselect_result.rc == 0"
+  failed_when: false
+  when: cypher_password_auth | bool
+
+- name: Fallback to minimal with faillock if sssd unavailable
+  ansible.builtin.command:
+    cmd: authselect select minimal with-faillock --force
+  when:
+    - cypher_password_auth | bool
+    - _authselect_result.rc != 0
+
+# --- Account Lockout (faillock.conf) ---
+# NOTE: unlock_time = 900 (15 min), NOT 0.
+# Permanent lockout (0) on a headless server is operationally hostile.
+
+- name: Set account lockout threshold (V-257870)
+  ansible.builtin.lineinfile:
+    path: /etc/security/faillock.conf
+    regexp: '^(#\s*)?deny\s*='
+    line: "deny = {{ cypher_lockout_attempts }}"
+    state: present
+    create: true
+    owner: root
+    group: root
+    mode: "0644"
+  when: cypher_password_auth | bool
+
+- name: Set account lockout time (V-257870) — 900s (15 min auto-unlock)
+  ansible.builtin.lineinfile:
+    path: /etc/security/faillock.conf
+    regexp: '^(#\s*)?unlock_time\s*='
+    line: "unlock_time = {{ cypher_lockout_time }}"
+    state: present
+  when: cypher_password_auth | bool
+
+- name: Set account lockout fail interval (V-257870)
+  ansible.builtin.lineinfile:
+    path: /etc/security/faillock.conf
+    regexp: '^(#\s*)?fail_interval\s*='
+    line: "fail_interval = {{ cypher_lockout_interval }}"
+    state: present
+  when: cypher_password_auth | bool
+
+- name: Ensure even_deny_root is set in faillock (V-257870)
+  ansible.builtin.lineinfile:
+    path: /etc/security/faillock.conf
+    regexp: '^(#\s*)?even_deny_root'
+    line: "even_deny_root"
+    state: present
+  when: cypher_password_auth | bool
+
+- name: Set faillock dir (V-257870)
+  ansible.builtin.lineinfile:
+    path: /etc/security/faillock.conf
+    regexp: '^(#\s*)?dir\s*='
+    line: "dir = /var/run/faillock"
+    state: present
+  when: cypher_password_auth | bool
+
+- name: Ensure silent is set in faillock (V-257870)
+  ansible.builtin.lineinfile:
+    path: /etc/security/faillock.conf
+    regexp: '^(#\s*)?silent'
+    line: "silent"
+    state: present
+  when: cypher_password_auth | bool
+
+- name: Ensure audit is set in faillock (V-257870)
+  ansible.builtin.lineinfile:
+    path: /etc/security/faillock.conf
+    regexp: '^(#\s*)?audit'
+    line: "audit"
+    state: present
+  when: cypher_password_auth | bool
+
+# --- PAM faillock ordering ---
+
+- name: Ensure pam_faillock preauth in system-auth
+  ansible.builtin.lineinfile:
+    path: /etc/pam.d/system-auth
+    regexp: 'pam_faillock\.so\s+preauth'
+    line: "auth        required                                     pam_faillock.so preauth"
+    insertbefore: '.*pam_unix\.so'
+    state: present
+  when: cypher_password_auth | bool
+
+- name: Ensure pam_faillock authfail in system-auth
+  ansible.builtin.lineinfile:
+    path: /etc/pam.d/system-auth
+    regexp: 'pam_faillock\.so\s+authfail'
+    line: "auth        [default=die]                                pam_faillock.so authfail"
+    insertafter: '.*pam_unix\.so'
+    state: present
+  when: cypher_password_auth | bool
+
+- name: Ensure pam_faillock account in system-auth
+  ansible.builtin.lineinfile:
+    path: /etc/pam.d/system-auth
+    regexp: '^account\s+.*pam_faillock\.so'
+    line: "account     required                                     pam_faillock.so"
+    insertbefore: '^account\s+.*pam_unix\.so'
+    state: present
+  when: cypher_password_auth | bool
+
+- name: Ensure pam_faillock account in password-auth
+  ansible.builtin.lineinfile:
+    path: /etc/pam.d/password-auth
+    regexp: '^account\s+.*pam_faillock\.so'
+    line: "account     required                                     pam_faillock.so"
+    insertbefore: '^account\s+.*pam_unix\.so'
+    state: present
+  when: cypher_password_auth | bool
+
+- name: Ensure pam_faillock preauth in password-auth
+  ansible.builtin.lineinfile:
+    path: /etc/pam.d/password-auth
+    regexp: 'pam_faillock\.so\s+preauth'
+    line: "auth        required                                     pam_faillock.so preauth"
+    insertbefore: '.*pam_unix\.so'
+    state: present
+  when: cypher_password_auth | bool
+
+- name: Ensure pam_faillock authfail in password-auth
+  ansible.builtin.lineinfile:
+    path: /etc/pam.d/password-auth
+    regexp: 'pam_faillock\.so\s+authfail'
+    line: "auth        [default=die]                                pam_faillock.so authfail"
+    insertafter: '.*pam_unix\.so'
+    state: present
+  when: cypher_password_auth | bool
+
+# --- Reset faillock for admin user after PAM changes ---
+# From desktop repo commit b245fe8: faillock records from prior auth attempts
+# can lock the admin user. Reset after all PAM/faillock config is applied.
+
+- name: Reset faillock for SSH admin user after PAM changes
+  ansible.builtin.command:
+    cmd: "faillock --user {{ cypher_ssh_admin_user }} --reset"
+  changed_when: true
+  failed_when: false
+  when: cypher_password_auth | bool

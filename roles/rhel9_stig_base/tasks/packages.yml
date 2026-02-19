@@ -1,0 +1,62 @@
+---
+# =============================================================================
+# Package Management — STIG V2R6 (Server/Headless)
+# =============================================================================
+
+- name: Remove prohibited packages (STIG)
+  ansible.builtin.package:
+    name: "{{ cypher_packages_remove }}"
+    state: absent
+  when: cypher_packages_remove | length > 0
+
+- name: Install required packages (STIG)
+  ansible.builtin.package:
+    name: "{{ cypher_packages_install }}"
+    state: present
+  when: cypher_packages_install | length > 0
+
+- name: Install STIG-required utility packages
+  ansible.builtin.dnf:
+    name:
+      - gnutls-utils
+      - nss-tools
+      - rng-tools
+      - postfix
+      - s-nail
+      - libreswan
+    state: present
+
+- name: Enable and start rngd
+  ansible.builtin.service:
+    name: rngd
+    state: started
+    enabled: true
+
+- name: Ensure localpkg_gpgcheck=1 in dnf.conf
+  ansible.builtin.lineinfile:
+    path: /etc/dnf/dnf.conf
+    regexp: '^(#\s*)?localpkg_gpgcheck\s*='
+    line: "localpkg_gpgcheck=1"
+    insertafter: '^\[main\]'
+    state: present
+
+- name: Ensure gpgcheck=1 in dnf.conf
+  ansible.builtin.lineinfile:
+    path: /etc/dnf/dnf.conf
+    regexp: '^(#\s*)?gpgcheck\s*='
+    line: "gpgcheck=1"
+    insertafter: '^\[main\]'
+    state: present
+
+- name: Ensure gpgcheck=1 in all repo files
+  ansible.builtin.shell:
+    cmd: sed -i 's/^gpgcheck\s*=\s*0/gpgcheck=1/' /etc/yum.repos.d/*.repo
+  changed_when: false
+
+- name: Install smart card packages (V-257935)
+  ansible.builtin.dnf:
+    name:
+      - opensc
+      - pcsc-lite
+      - pcsc-lite-ccid
+    state: present

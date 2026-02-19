@@ -1,0 +1,205 @@
+---
+# =============================================================================
+# Services — STIG V2R6 (Server/Headless)
+# =============================================================================
+# NO GNOME/GDM/dconf tasks — headless server.
+# =============================================================================
+
+# --- Login Banners ---
+
+- name: Set /etc/issue login banner (V-257886)
+  ansible.builtin.copy:
+    content: "{{ cypher_banner_text }}"
+    dest: /etc/issue
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Set /etc/issue.net SSH banner (V-257944)
+  ansible.builtin.copy:
+    content: "{{ cypher_banner_text }}"
+    dest: /etc/issue.net
+    owner: root
+    group: root
+    mode: "0644"
+
+# --- SELinux ---
+
+- name: Set SELinux to {{ cypher_selinux_mode }} / {{ cypher_selinux_policy }} (V-257845)
+  ansible.posix.selinux:
+    policy: "{{ cypher_selinux_policy }}"
+    state: "{{ cypher_selinux_mode }}"
+
+# --- Core Dump Restrictions ---
+
+- name: Configure systemd coredump to disable storage
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/coredump.conf
+    regexp: '^(#\s*)?Storage='
+    line: "Storage=none"
+    insertafter: '^\[Coredump\]'
+    create: true
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Configure systemd coredump ProcessSizeMax=0
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/coredump.conf
+    regexp: '^(#\s*)?ProcessSizeMax='
+    line: "ProcessSizeMax=0"
+    insertafter: '^\[Coredump\]'
+    create: true
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Set hard core limit to 0
+  ansible.builtin.copy:
+    content: |
+      # STIG — Disable core dumps
+      * hard core 0
+    dest: /etc/security/limits.d/99-stig.conf
+    owner: root
+    group: root
+    mode: "0644"
+
+# --- Time Synchronization ---
+
+- name: Enable and start chronyd (V-258008)
+  ansible.builtin.service:
+    name: chronyd
+    state: started
+    enabled: true
+
+# Chrony client-mode hardening (server mode in ntp_server role)
+- name: Disable NTP server mode in chrony (port 0)
+  ansible.builtin.lineinfile:
+    path: /etc/chrony.conf
+    regexp: '^port\s'
+    line: "port 0"
+    state: present
+
+- name: Disable chronyc network access (cmdport 0)
+  ansible.builtin.lineinfile:
+    path: /etc/chrony.conf
+    regexp: '^cmdport\s'
+    line: "cmdport 0"
+    state: present
+
+# --- System Logging ---
+
+- name: Enable and start rsyslog (V-257863)
+  ansible.builtin.service:
+    name: rsyslog
+    state: started
+    enabled: true
+
+# --- fapolicyd ---
+
+- name: Check if fapolicyd is installed (V-258068)
+  ansible.builtin.command:
+    cmd: rpm -q fapolicyd
+  register: _fapolicyd_installed
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Enable and start fapolicyd (V-258068)
+  ansible.builtin.service:
+    name: fapolicyd
+    state: started
+    enabled: true
+  when: _fapolicyd_installed.rc == 0
+
+# --- USBGuard ---
+
+- name: Check if usbguard is installed (V-258105)
+  ansible.builtin.command:
+    cmd: rpm -q usbguard
+  register: _usbguard_installed
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Generate USBGuard base policy if no rules exist (V-258105)
+  ansible.builtin.shell:
+    cmd: usbguard generate-policy > /etc/usbguard/rules.conf
+    creates: /etc/usbguard/rules.conf
+  when: _usbguard_installed.rc == 0
+
+- name: Enable and start usbguard (V-258105)
+  ansible.builtin.service:
+    name: usbguard
+    state: started
+    enabled: true
+  when: _usbguard_installed.rc == 0
+
+# --- Disable Unnecessary Services ---
+
+- name: Check if autofs is installed (V-258097)
+  ansible.builtin.command:
+    cmd: rpm -q autofs
+  register: _autofs_installed
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Disable and stop autofs (V-258097)
+  ansible.builtin.service:
+    name: autofs
+    state: stopped
+    enabled: false
+  when: _autofs_installed.rc == 0
+
+- name: Check if rpcbind is installed (V-258055)
+  ansible.builtin.command:
+    cmd: rpm -q rpcbind
+  register: _rpcbind_installed
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Disable and stop rpcbind (V-258055)
+  ansible.builtin.service:
+    name: rpcbind
+    state: stopped
+    enabled: false
+  when: _rpcbind_installed.rc == 0
+
+- name: Disable and stop rpcbind.socket (V-258055)
+  ansible.builtin.service:
+    name: rpcbind.socket
+    state: stopped
+    enabled: false
+  when: _rpcbind_installed.rc == 0
+  failed_when: false
+
+# --- Mask Dangerous Services ---
+
+- name: Disable and mask debug-shell service
+  ansible.builtin.systemd:
+    name: debug-shell.service
+    enabled: false
+    masked: true
+
+- name: Disable and mask systemd-coredump socket
+  ansible.builtin.systemd:
+    name: systemd-coredump.socket
+    enabled: false
+    masked: true
+
+- name: Disable and stop kdump service
+  ansible.builtin.systemd:
+    name: kdump.service
+    enabled: false
+    state: stopped
+  ignore_errors: true
+
+# --- Default Target: multi-user (headless) ---
+
+- name: Set default systemd target to multi-user (V-258098)
+  ansible.builtin.command:
+    cmd: systemctl set-default multi-user.target
+  register: _set_default_target
+  changed_when: "'Created symlink' in _set_default_target.stdout"

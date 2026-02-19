@@ -1,0 +1,57 @@
+---
+# =============================================================================
+# Smartcard / CAC Authentication — STIG V2R6
+# =============================================================================
+# Variable: stig_smartcard_auth (default: false)
+# When false (IDAM architecture), all smartcard tasks are skipped.
+# These rules become environment-justified exceptions documented in docs/poam.md:
+#   - configure_opensc_card_drivers
+#   - install_smartcard_packages
+#   - dconf_gnome_lock_screen_on_smartcard_removal
+#   - sssd_certificate_verification
+#   - sssd_enable_certmap
+#   - sssd_enable_smartcards
+# =============================================================================
+
+- name: Smartcard auth — skipped (IDAM architecture)
+  ansible.builtin.debug:
+    msg: >-
+      stig_smartcard_auth=false — Smartcard/CAC rules are environment-justified
+      exceptions. See docs/poam.md for POA&M documentation.
+  when: not stig_smartcard_auth | bool
+
+- name: Configure CAC/PIV smartcard authentication
+  when: stig_smartcard_auth | bool
+  block:
+    - name: Install smartcard packages
+      ansible.builtin.dnf:
+        name:
+          - opensc
+          - pcsc-lite
+          - pcsc-lite-ccid
+          - pam_pkcs11
+        state: present
+
+    - name: Enable pcscd service
+      ansible.builtin.service:
+        name: pcscd
+        state: started
+        enabled: true
+
+    - name: Configure authselect with smartcard support
+      ansible.builtin.command:
+        cmd: authselect select sssd with-smartcard with-smartcard-required --force
+      changed_when: true
+
+    - name: Configure SSSD for certificate mapping
+      ansible.builtin.blockinfile:
+        path: /etc/sssd/sssd.conf
+        block: |
+          [certmap/default]
+          matchrule = <KU>digitalSignature
+          maprule = (userCertificate;binary={cert!bin})
+        marker: "# {mark} ANSIBLE MANAGED — STIG smartcard certmap"
+        create: true
+        owner: root
+        group: root
+        mode: "0600"

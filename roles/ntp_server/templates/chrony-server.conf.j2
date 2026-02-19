@@ -1,0 +1,31 @@
+# {{ ansible_managed }}
+# Chrony SERVER configuration — serves time to client networks
+# Satisfies: chronyd_or_ntpd_set_maxpoll, chronyd_server_directive
+
+{% for server in stig_chrony_servers %}
+server {{ server }} iburst maxpoll {{ stig_chrony_maxpoll }}
+{% endfor %}
+
+# Allow client networks to query this server
+{% for network in stig_ntp_allow_networks %}
+allow {{ network }}
+{% endfor %}
+
+# Record the rate at which the system clock gains/losses time
+driftfile /var/lib/chrony/drift
+
+# Allow the system clock to be stepped in the first three updates
+makestep 1.0 3
+
+# Enable kernel synchronization of the real-time clock (RTC)
+rtcsync
+
+# Serve time on standard NTP port (server mode)
+# NOTE: This overrides base role's "port 0" — intentional for NTP server
+port 123
+
+# Disable chronyc network access
+cmdport 0
+
+# Specify directory for log files
+logdir /var/log/chrony

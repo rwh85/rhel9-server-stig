@@ -1,0 +1,9 @@
+reports/
+*.retry
+*.pyc
+__pycache__/
+.vault_pass
+vault.yml
+*.log
+.env
+inventory/hosts

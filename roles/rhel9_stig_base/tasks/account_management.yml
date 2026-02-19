@@ -1,0 +1,117 @@
+---
+# =============================================================================
+# Account Management — STIG V2R6 (Server/Headless)
+# =============================================================================
+# NO dconf/GNOME/GDM tasks — headless server.
+# =============================================================================
+
+# --- Root Login Restrictions ---
+
+- name: Ensure securetty is empty to restrict root console login (V-257950)
+  ansible.builtin.copy:
+    content: ""
+    dest: /etc/securetty
+    owner: root
+    group: root
+    mode: "0600"
+    force: false
+
+# --- Umask Settings ---
+
+- name: Set umask 077 in /etc/bashrc
+  ansible.builtin.lineinfile:
+    path: /etc/bashrc
+    regexp: '^\s*umask\s+'
+    line: "       umask 077"
+    state: present
+
+- name: Set umask 077 in /etc/csh.cshrc
+  ansible.builtin.lineinfile:
+    path: /etc/csh.cshrc
+    regexp: '^\s*umask\s+'
+    line: "    umask 077"
+    state: present
+    create: true
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Set umask 077 in /etc/profile
+  ansible.builtin.lineinfile:
+    path: /etc/profile
+    regexp: '^\s*umask\s+'
+    line: "    umask 077"
+    state: present
+
+- name: Set UMASK 077 in /etc/login.defs
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    regexp: '^UMASK'
+    line: "UMASK\t\t077"
+    state: present
+
+# --- UID_MIN ---
+
+- name: Set UID_MIN to 1000 in login.defs (V-257894)
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    regexp: '^UID_MIN'
+    line: "UID_MIN\t\t\t1000"
+    state: present
+
+# --- Lock Unused System Accounts ---
+
+- name: Gather system accounts with shells (V-257893)
+  ansible.builtin.shell: >
+    awk -F: '($3 < 1000 && $1 != "root" && $7 != "/sbin/nologin" && $7 != "/bin/false" && $7 != "/usr/sbin/nologin") {print $1}' /etc/passwd
+  register: _system_accounts_with_shells
+  changed_when: false
+  check_mode: false
+
+- name: Set nologin shell for unused system accounts (V-257893)
+  ansible.builtin.user:
+    name: "{{ item }}"
+    shell: /usr/sbin/nologin
+  loop: "{{ _system_accounts_with_shells.stdout_lines }}"
+  when: _system_accounts_with_shells.stdout_lines | length > 0
+
+# --- Ctrl-Alt-Del ---
+
+- name: Remove existing ctrl-alt-del.target symlink if present
+  ansible.builtin.file:
+    path: /etc/systemd/system/ctrl-alt-del.target
+    state: absent
+  when: stig_disable_ctrl_alt_del | default(true)
+
+- name: Mask ctrl-alt-del.target (STIG)
+  ansible.builtin.systemd:
+    name: ctrl-alt-del.target
+    masked: true
+  when: stig_disable_ctrl_alt_del | default(true)
+
+# --- Inactive Account Lock ---
+
+- name: Set default inactive days for new accounts (STIG)
+  ansible.builtin.command:
+    cmd: useradd -D -f 35
+  register: _useradd_inactive
+  changed_when: "'changed' in _useradd_inactive.stdout | default('')"
+  failed_when: _useradd_inactive.rc != 0
+
+# --- tmux for Interactive Sessions (V-257882) ---
+
+- name: Deploy tmux wrapper for interactive sessions (V-257882)
+  ansible.builtin.copy:
+    content: |
+      # STIG V-257882 — Force tmux for interactive sessions
+      if [ -n "$PS1" ] && [ -z "$TMUX" ] && [ "$(tty)" != "not a tty" ]; then
+        parent=$(ps -o comm= -p $PPID 2>/dev/null)
+        if [ "$parent" != "sshd" ] && [ "$parent" != "login" ]; then
+          return
+        fi
+        exec tmux new-session
+      fi
+    dest: /etc/profile.d/tmux.sh
+    owner: root
+    group: root
+    mode: "0644"

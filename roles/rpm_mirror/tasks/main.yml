@@ -1,0 +1,77 @@
+---
+# =============================================================================
+# RPM Mirror — Local Repository Hosting
+# =============================================================================
+
+- name: Install RPM mirror packages
+  ansible.builtin.dnf:
+    name:
+      - httpd
+      - createrepo
+      - yum-utils
+    state: present
+
+- name: Create repo directory structure
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+    setype: httpd_sys_content_t
+  loop: "{{ rpm_mirror_repos }}"
+
+- name: Set SELinux context on repo base path
+  ansible.builtin.command:
+    cmd: "semanage fcontext -a -t httpd_sys_content_t '{{ rpm_mirror_base_path }}(/.*)?'"
+  register: _semanage_repo
+  changed_when: _semanage_repo.rc == 0
+  failed_when: false
+
+- name: Apply SELinux context to repo directories
+  ansible.builtin.command:
+    cmd: "restorecon -Rv {{ rpm_mirror_base_path }}"
+  changed_when: true
+
+- name: Deploy httpd vhost for repos
+  ansible.builtin.template:
+    src: repos-vhost.conf.j2
+    dest: /etc/httpd/conf.d/repos.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart httpd
+
+- name: Enable and start httpd
+  ansible.builtin.service:
+    name: httpd
+    state: started
+    enabled: true
+
+- name: Allow HTTP in firewall for repo clients
+  ansible.posix.firewalld:
+    service: http
+    permanent: true
+    immediate: true
+    state: enabled
+  when: cypher_firewalld_enabled | default(true) | bool
+
+- name: Allow HTTPS in firewall for repo clients
+  ansible.posix.firewalld:
+    service: https
+    permanent: true
+    immediate: true
+    state: enabled
+  when: cypher_firewalld_enabled | default(true) | bool
+
+- name: Deploy createrepo update cron
+  ansible.builtin.cron:
+    name: "Update repo metadata"
+    minute: "0"
+    hour: "3"
+    job: >-
+      {% for repo in rpm_mirror_repos %}
+      /usr/bin/createrepo --update {{ repo.path }} 2>&1 | logger -t createrepo;
+      {% endfor %}
+    user: root
+    cron_file: cypher-repo-update

@@ -1,0 +1,123 @@
+---
+# =============================================================================
+# File Permissions — STIG V2R6 (Server/Headless)
+# =============================================================================
+
+- name: Set /etc/shadow permissions to 0000 (V-257908)
+  ansible.builtin.file:
+    path: /etc/shadow
+    owner: root
+    group: root
+    mode: "0000"
+
+- name: Set /etc/passwd permissions to 0644 (V-257905)
+  ansible.builtin.file:
+    path: /etc/passwd
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Set /etc/group permissions to 0644 (V-257906)
+  ansible.builtin.file:
+    path: /etc/group
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Set /etc/gshadow permissions to 0000 (V-257909)
+  ansible.builtin.file:
+    path: /etc/gshadow
+    owner: root
+    group: root
+    mode: "0000"
+
+- name: Set cron directory permissions to 0700 (V-257913)
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: "0700"
+    state: directory
+  loop:
+    - /etc/cron.d
+    - /etc/cron.daily
+    - /etc/cron.weekly
+    - /etc/cron.monthly
+    - /etc/cron.hourly
+
+- name: Set /etc/crontab permissions to 0600 (V-257914)
+  ansible.builtin.file:
+    path: /etc/crontab
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Set /var/log permissions to 0750 (V-257915)
+  ansible.builtin.file:
+    path: /var/log
+    owner: root
+    group: root
+    mode: "0750"
+    state: directory
+
+- name: Set /etc/ssh/sshd_config permissions to 0600 (V-257940)
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Ensure sshd_config.d directory permissions (V-257940)
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config.d
+    owner: root
+    group: root
+    mode: "0700"
+    state: directory
+
+# --- AIDE ---
+
+- name: Create AIDE database directory (V-257930)
+  ansible.builtin.file:
+    path: /var/lib/aide
+    owner: root
+    group: root
+    mode: "0700"
+    state: directory
+  when: cypher_aide_enabled | bool
+
+- name: Check if AIDE database exists (V-257930)
+  ansible.builtin.stat:
+    path: /var/lib/aide/aide.db.gz
+  register: _aide_db
+  when: cypher_aide_enabled | bool
+
+- name: Initialize AIDE database (V-257930)
+  ansible.builtin.command:
+    cmd: aide --init
+  when:
+    - cypher_aide_enabled | bool
+    - not (_aide_db.stat.exists | default(false))
+  changed_when: true
+
+- name: Copy new AIDE database to active location (V-257930)
+  ansible.builtin.copy:
+    src: /var/lib/aide/aide.db.new.gz
+    dest: /var/lib/aide/aide.db.gz
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0600"
+  when:
+    - cypher_aide_enabled | bool
+    - not (_aide_db.stat.exists | default(false))
+
+- name: Configure AIDE daily integrity check (V-257931)
+  ansible.builtin.cron:
+    name: "AIDE integrity check"
+    minute: "5"
+    hour: "4"
+    job: "/usr/sbin/aide --check"
+    user: root
+    cron_file: cypher-aide-check
+  when: cypher_aide_enabled | bool

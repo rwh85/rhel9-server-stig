@@ -1,0 +1,16 @@
+# {{ ansible_managed }}
+# RPM Mirror — httpd vhost configuration
+
+<VirtualHost *:{{ rpm_mirror_http_port }}>
+    ServerName {{ rpm_mirror_server_name }}
+    DocumentRoot {{ rpm_mirror_base_path }}
+
+    <Directory {{ rpm_mirror_base_path }}>
+        Options Indexes FollowSymLinks
+        AllowOverride None
+        Require all granted
+    </Directory>
+
+    ErrorLog /var/log/httpd/repos-error.log
+    CustomLog /var/log/httpd/repos-access.log combined
+</VirtualHost>

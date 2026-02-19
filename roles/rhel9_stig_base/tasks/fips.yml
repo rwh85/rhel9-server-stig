@@ -1,0 +1,46 @@
+---
+# =============================================================================
+# FIPS 140-3 Enablement — STIG V2R6 (Round 5)
+# =============================================================================
+# V-257844 CAT I — FIPS mode must be enabled.
+# NOTE: FIPS is best enabled at install time. This enables it post-install
+# but a reboot is required for full activation.
+# =============================================================================
+
+- name: Check FIPS mode status
+  ansible.builtin.command:
+    cmd: fips-mode-setup --check
+  register: fips_status
+  changed_when: false
+  failed_when: false
+
+- name: Enable FIPS mode
+  ansible.builtin.command:
+    cmd: fips-mode-setup --enable
+  when:
+    - cypher_fips_enabled | default(true) | bool
+    - "'is not enabled' in fips_status.stdout or fips_status.rc != 0"
+  notify: reboot required
+
+- name: Check if STIG subpolicy exists
+  ansible.builtin.stat:
+    path: /usr/share/crypto-policies/policies/modules/STIG.pmod
+  register: _stig_pmod
+
+- name: Set crypto policy to FIPS:STIG (if available)
+  ansible.builtin.command:
+    cmd: update-crypto-policies --set FIPS:STIG
+  when:
+    - cypher_fips_enabled | default(true) | bool
+    - _stig_pmod.stat.exists | default(false)
+  register: crypto_result_stig
+  changed_when: "'Setting system policy' in (crypto_result_stig.stdout | default(''))"
+
+- name: Set crypto policy to FIPS (fallback)
+  ansible.builtin.command:
+    cmd: update-crypto-policies --set FIPS
+  when:
+    - cypher_fips_enabled | default(true) | bool
+    - not (_stig_pmod.stat.exists | default(false))
+  register: crypto_result
+  changed_when: "'Setting system policy' in (crypto_result.stdout | default(''))"

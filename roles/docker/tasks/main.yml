@@ -1,0 +1,60 @@
+---
+# =============================================================================
+# Docker CE — Install & Harden
+# =============================================================================
+# STIG exceptions for Docker documented in docs/poam.md
+# =============================================================================
+
+- name: Install container-selinux
+  ansible.builtin.dnf:
+    name: container-selinux
+    state: present
+
+- name: Add Docker CE repository (if not using local mirror)
+  ansible.builtin.command:
+    cmd: dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+    creates: /etc/yum.repos.d/docker-ce.repo
+  when: docker_registry_mirror | length == 0
+
+- name: Install Docker CE packages
+  ansible.builtin.dnf:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-compose-plugin
+    state: present
+
+- name: Create /etc/docker directory
+  ansible.builtin.file:
+    path: /etc/docker
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy hardened daemon.json
+  ansible.builtin.template:
+    src: daemon.json.j2
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart docker
+
+- name: Enable and start Docker
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Open Docker firewall ports
+  ansible.posix.firewalld:
+    port: "{{ item }}"
+    permanent: true
+    immediate: true
+    state: enabled
+  loop: "{{ docker_firewall_ports }}"
+  when:
+    - cypher_firewalld_enabled | default(true) | bool
+    - docker_firewall_ports | length > 0

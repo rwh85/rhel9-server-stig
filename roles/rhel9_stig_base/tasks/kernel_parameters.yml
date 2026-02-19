@@ -1,0 +1,387 @@
+---
+# =============================================================================
+# Kernel Parameters — STIG V2R6 (Server/Headless)
+# =============================================================================
+
+# --- Network Sysctl Hardening ---
+
+- name: Disable IP forwarding (V-257991)
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: "{{ cypher_sysctl_ip_forward | string }}"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Disable ICMP send redirects (V-257993)
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.all.send_redirects
+    value: "{{ cypher_sysctl_send_redirects | string }}"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Disable ICMP accept redirects (V-257994)
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.all.accept_redirects
+    value: "{{ cypher_sysctl_accept_redirects | string }}"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Disable ICMP accept redirects on default (V-257995)
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.default.accept_redirects
+    value: "{{ cypher_sysctl_accept_redirects | string }}"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Disable accept source route (V-257997)
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.all.accept_source_route
+    value: "{{ cypher_sysctl_accept_source_route | string }}"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Disable accept source route on default (V-257998)
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.default.accept_source_route
+    value: "{{ cypher_sysctl_accept_source_route | string }}"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Enable logging of martian packets (V-258000)
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.all.log_martians
+    value: "{{ cypher_sysctl_log_martians | string }}"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Enable reverse path filtering (V-258002)
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.all.rp_filter
+    value: "{{ cypher_sysctl_rp_filter | string }}"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Enable TCP SYN cookies (V-258004)
+  ansible.posix.sysctl:
+    name: net.ipv4.tcp_syncookies
+    value: "{{ cypher_sysctl_tcp_syncookies | string }}"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Disable IPv6 accept source route (V-258005)
+  ansible.posix.sysctl:
+    name: net.ipv6.conf.all.accept_source_route
+    value: "0"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Disable IPv6 accept redirects (V-258006)
+  ansible.posix.sysctl:
+    name: net.ipv6.conf.all.accept_redirects
+    value: "0"
+    sysctl_set: true
+    state: present
+    reload: true
+
+# --- GRUB Kernel Parameters ---
+
+- name: Ensure audit=1 in GRUB_CMDLINE_LINUX
+  ansible.builtin.replace:
+    path: /etc/default/grub
+    regexp: '^(GRUB_CMDLINE_LINUX="(?!.*\baudit=1\b).*)"$'
+    replace: '\1 audit=1"'
+  notify: rebuild grub
+
+- name: Ensure audit_backlog_limit=8192 in GRUB_CMDLINE_LINUX
+  ansible.builtin.replace:
+    path: /etc/default/grub
+    regexp: '^(GRUB_CMDLINE_LINUX="(?!.*\baudit_backlog_limit=8192\b).*)"$'
+    replace: '\1 audit_backlog_limit=8192"'
+  notify: rebuild grub
+
+- name: Ensure pti=on in GRUB_CMDLINE_LINUX
+  ansible.builtin.replace:
+    path: /etc/default/grub
+    regexp: '^(GRUB_CMDLINE_LINUX="(?!.*\bpti=on\b).*)"$'
+    replace: '\1 pti=on"'
+  notify: rebuild grub
+
+- name: Ensure vsyscall=none in GRUB_CMDLINE_LINUX
+  ansible.builtin.replace:
+    path: /etc/default/grub
+    regexp: '^(GRUB_CMDLINE_LINUX="(?!.*\bvsyscall=none\b).*)"$'
+    replace: '\1 vsyscall=none"'
+  notify: rebuild grub
+
+- name: Ensure page_poison=1 in GRUB_CMDLINE_LINUX
+  ansible.builtin.replace:
+    path: /etc/default/grub
+    regexp: '^(GRUB_CMDLINE_LINUX="(?!.*\bpage_poison=1\b).*)"$'
+    replace: '\1 page_poison=1"'
+  notify: rebuild grub
+
+- name: Ensure init_on_alloc=1 in GRUB_CMDLINE_LINUX
+  ansible.builtin.replace:
+    path: /etc/default/grub
+    regexp: '^(GRUB_CMDLINE_LINUX="(?!.*\binit_on_alloc=1\b).*)"$'
+    replace: '\1 init_on_alloc=1"'
+  notify: rebuild grub
+
+- name: Ensure init_on_free=1 in GRUB_CMDLINE_LINUX
+  ansible.builtin.replace:
+    path: /etc/default/grub
+    regexp: '^(GRUB_CMDLINE_LINUX="(?!.*\binit_on_free=1\b).*)"$'
+    replace: '\1 init_on_free=1"'
+  notify: rebuild grub
+
+# --- USB Storage ---
+
+- name: Disable USB storage via modprobe (V-258105)
+  ansible.builtin.copy:
+    content: |
+      # V-258105 — Disable USB mass storage
+      install usb-storage /bin/false
+      blacklist usb-storage
+    dest: /etc/modprobe.d/cypher-usb.conf
+    owner: root
+    group: root
+    mode: "0644"
+  when: cypher_usb_policy == "deny_all"
+
+# --- Wireless Interfaces ---
+
+- name: Disable wireless interfaces (V-258010)
+  ansible.builtin.command:
+    cmd: nmcli radio wifi off
+  changed_when: true
+  failed_when: false
+  when: cypher_wireless_disabled | bool
+
+# --- Bluetooth ---
+
+- name: Disable bluetooth service (V-258013)
+  ansible.builtin.service:
+    name: bluetooth
+    state: stopped
+    enabled: false
+  when: cypher_bluetooth_disabled | bool
+  failed_when: false
+
+# --- Kernel Security Hardening ---
+
+- name: Set kernel.core_pattern to disable core dumps (V-257983)
+  ansible.posix.sysctl:
+    name: kernel.core_pattern
+    value: "|/bin/false"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Restrict dmesg access (V-257984)
+  ansible.posix.sysctl:
+    name: kernel.dmesg_restrict
+    value: "1"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Disable kexec_load (V-257985)
+  ansible.posix.sysctl:
+    name: kernel.kexec_load_disabled
+    value: "1"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Restrict perf_event_paranoid (V-257986)
+  ansible.posix.sysctl:
+    name: kernel.perf_event_paranoid
+    value: "2"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Disable unprivileged BPF (V-257987)
+  ansible.posix.sysctl:
+    name: kernel.unprivileged_bpf_disabled
+    value: "1"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Restrict ptrace scope via Yama (V-257988)
+  ansible.posix.sysctl:
+    name: kernel.yama.ptrace_scope
+    value: "1"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Disable user namespaces (V-257989)
+  ansible.posix.sysctl:
+    name: user.max_user_namespaces
+    value: "0"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Restrict kernel pointer access (V-257990)
+  ansible.posix.sysctl:
+    name: kernel.kptr_restrict
+    value: "1"
+    sysctl_set: true
+    state: present
+    reload: true
+
+# --- Additional Sysctl ---
+
+- name: Disable IPv6 router advertisements (all)
+  ansible.posix.sysctl:
+    name: net.ipv6.conf.all.accept_ra
+    value: "0"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Disable IPv6 router advertisements (default)
+  ansible.posix.sysctl:
+    name: net.ipv6.conf.default.accept_ra
+    value: "0"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Disable IPv4 forwarding (all)
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.all.forwarding
+    value: "0"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Disable send redirects (default)
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.default.send_redirects
+    value: "0"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Enable logging martian packets (default)
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.default.log_martians
+    value: "1"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Harden BPF JIT compiler
+  ansible.posix.sysctl:
+    name: net.core.bpf_jit_harden
+    value: "2"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Enable ASLR (randomize_va_space)
+  ansible.posix.sysctl:
+    name: kernel.randomize_va_space
+    value: "2"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Enable reverse path filtering on default interface
+  ansible.posix.sysctl:
+    name: net.ipv4.conf.default.rp_filter
+    value: "1"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Ignore ICMP echo broadcasts
+  ansible.posix.sysctl:
+    name: net.ipv4.icmp_echo_ignore_broadcasts
+    value: "1"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Ignore bogus ICMP error responses
+  ansible.posix.sysctl:
+    name: net.ipv4.icmp_ignore_bogus_error_responses
+    value: "1"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Disable IPv6 accept redirects on default
+  ansible.posix.sysctl:
+    name: net.ipv6.conf.default.accept_redirects
+    value: "0"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Disable IPv6 accept source route on default
+  ansible.posix.sysctl:
+    name: net.ipv6.conf.default.accept_source_route
+    value: "0"
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Disable IPv6 forwarding (all)
+  ansible.posix.sysctl:
+    name: net.ipv6.conf.all.forwarding
+    value: "0"
+    sysctl_set: true
+    state: present
+    reload: true
+
+# --- Kernel Module Blacklisting ---
+
+- name: Deploy STIG kernel module blacklist
+  ansible.builtin.copy:
+    content: |
+      # STIG — Disable uncommon network protocols and filesystems
+      install atm /bin/false
+      blacklist atm
+      install can /bin/false
+      blacklist can
+      install firewire-core /bin/false
+      blacklist firewire-core
+      install sctp /bin/false
+      blacklist sctp
+      install tipc /bin/false
+      blacklist tipc
+      install cramfs /bin/false
+      blacklist cramfs
+      install usb-storage /bin/false
+      blacklist usb-storage
+    dest: /etc/modprobe.d/stig-blacklist.conf
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Blacklist bluetooth kernel module (V-258013)
+  ansible.builtin.copy:
+    content: |
+      # V-258013 — Disable bluetooth
+      install bluetooth /bin/false
+      blacklist bluetooth
+    dest: /etc/modprobe.d/cypher-bluetooth.conf
+    owner: root
+    group: root
+    mode: "0644"
+  when: cypher_bluetooth_disabled | bool

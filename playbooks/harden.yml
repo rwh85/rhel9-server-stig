@@ -1,0 +1,14 @@
+---
+- name: Apply RHEL 9 Server STIG hardening
+  hosts: servers
+  become: true
+  roles:
+    - rhel9_stig_base
+    - role: rpm_mirror
+      when: server_rpm_mirror_enabled | default(true) | bool
+    - role: ntp_server
+      when: server_ntp_enabled | default(true) | bool
+    - role: docker
+      when: server_docker_enabled | default(true) | bool
+    - role: ansible_node
+      when: server_ansible_node_enabled | default(true) | bool

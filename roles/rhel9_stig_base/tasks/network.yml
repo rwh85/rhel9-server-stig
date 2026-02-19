@@ -1,0 +1,132 @@
+---
+# =============================================================================
+# Network — STIG V2R6 (Server/Headless)
+# =============================================================================
+
+# --- SSH Admin User (prevent lockout before PermitRootLogin no) ---
+
+- name: Ensure SSH admin user exists ({{ cypher_ssh_admin_user }})
+  ansible.builtin.user:
+    name: "{{ cypher_ssh_admin_user }}"
+    password: "{{ cypher_ssh_admin_password | password_hash('sha512') }}"
+    groups: wheel
+    append: true
+    shell: /bin/bash
+    create_home: true
+    state: present
+    update_password: always
+
+- name: Reset faillock for SSH admin user (prevent permanent lockout)
+  ansible.builtin.command:
+    cmd: "faillock --user {{ cypher_ssh_admin_user }} --reset"
+  changed_when: true
+  failed_when: false
+
+# --- SSH Hardening ---
+
+- name: Ensure sshd_config.d directory exists
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Deploy STIG-compliant SSH configuration
+  ansible.builtin.copy:
+    content: |
+      # STIG SSH Hardening — RHEL 9 Server V2R6
+      # Managed by Ansible — do not edit manually
+
+      PermitRootLogin {{ cypher_ssh_permit_root }}
+      MaxAuthTries {{ cypher_ssh_max_auth_tries }}
+      ClientAliveInterval {{ cypher_ssh_client_alive_interval }}
+      ClientAliveCountMax {{ cypher_ssh_client_alive_count }}
+      Banner {{ cypher_ssh_banner }}
+      Ciphers {{ cypher_ssh_ciphers }}
+      MACs {{ cypher_ssh_macs }}
+      KexAlgorithms {{ cypher_ssh_kex }}
+      X11Forwarding no
+      X11UseLocalhost yes
+      HostbasedAuthentication no
+      IgnoreRhosts yes
+      IgnoreUserKnownHosts yes
+      PermitEmptyPasswords no
+      PermitUserEnvironment no
+      StrictModes yes
+      Compression no
+      KerberosAuthentication no
+      GSSAPIAuthentication no
+      RekeyLimit 1G 1h
+      LogLevel VERBOSE
+      PrintLastLog yes
+    dest: /etc/ssh/sshd_config.d/00-stig.conf
+    owner: root
+    group: root
+    mode: "0600"
+  notify: restart sshd
+
+- name: Remove old cypher-stig.conf SSH drop-in
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config.d/cypher-stig.conf
+    state: absent
+  notify: restart sshd
+
+- name: Ensure 50-redhat.conf exists without conflicting settings
+  ansible.builtin.copy:
+    content: |
+      # RHEL default — managed by Ansible (STIG settings in 00-stig.conf)
+    dest: /etc/ssh/sshd_config.d/50-redhat.conf
+    owner: root
+    group: root
+    mode: "0600"
+  notify: restart sshd
+
+- name: Ensure sshd_config includes crypto policy
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^Include\s+/etc/crypto-policies'
+    line: "Include /etc/crypto-policies/back-ends/opensshserver.config"
+    insertbefore: BOF
+    state: present
+  notify: restart sshd
+
+- name: Ensure sshd_config includes drop-in directory
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^Include\s+/etc/ssh/sshd_config\.d'
+    line: "Include /etc/ssh/sshd_config.d/*.conf"
+    insertafter: '^Include /etc/crypto-policies'
+    state: present
+  notify: restart sshd
+
+- name: Set permissions on all sshd_config.d drop-in files
+  ansible.builtin.shell:
+    cmd: find /etc/ssh/sshd_config.d/ -type f -exec chmod 0600 {} \; -exec chown root:root {} \;
+  changed_when: true
+
+# --- Firewalld ---
+
+- name: Enable and start firewalld (V-258088)
+  ansible.builtin.service:
+    name: firewalld
+    state: started
+    enabled: true
+  when: cypher_firewalld_enabled | bool
+
+- name: Allow SSH in {{ cypher_firewalld_default_zone }} zone before switching (V-258089)
+  ansible.posix.firewalld:
+    zone: "{{ cypher_firewalld_default_zone }}"
+    service: ssh
+    permanent: true
+    immediate: true
+    state: enabled
+  when: cypher_firewalld_enabled | bool
+
+- name: Set firewalld default zone to {{ cypher_firewalld_default_zone }} (V-258089)
+  ansible.builtin.command:
+    cmd: "firewall-cmd --set-default-zone={{ cypher_firewalld_default_zone }}"
+  register: _firewalld_zone
+  changed_when: "'ZONE_ALREADY_SET' not in _firewalld_zone.stderr"
+  when: cypher_firewalld_enabled | bool
+  notify: reload firewalld

@@ -1,0 +1,46 @@
+---
+# =============================================================================
+# DNS Configuration — STIG V2R6
+# =============================================================================
+# Deploy-time variable: stig_dns_servers
+# When set, configures static DNS via NetworkManager.
+# Burns 2 rules: network_configure_name_resolution, networkmanager_dns_mode
+# =============================================================================
+
+- name: DNS — skip if stig_dns_servers is empty
+  ansible.builtin.debug:
+    msg: "stig_dns_servers is empty — skipping DNS configuration"
+  when: stig_dns_servers | length == 0
+
+- name: Configure static DNS
+  when: stig_dns_servers | length > 0
+  block:
+    - name: Set NetworkManager dns=none to prevent overwriting resolv.conf
+      ansible.builtin.lineinfile:
+        path: /etc/NetworkManager/conf.d/90-stig-dns.conf
+        line: "{{ item }}"
+        create: true
+        owner: root
+        group: root
+        mode: "0644"
+      loop:
+        - "[main]"
+        - "dns=none"
+      notify: restart networkmanager
+
+    - name: Deploy static resolv.conf
+      ansible.builtin.copy:
+        content: |
+          # STIG — Static DNS configuration
+          # Managed by Ansible — do not edit manually
+          # Satisfies: network_configure_name_resolution
+          {% for server in stig_dns_servers %}
+          nameserver {{ server }}
+          {% endfor %}
+          {% if stig_dns_search_domain | length > 0 %}
+          search {{ stig_dns_search_domain }}
+          {% endif %}
+        dest: /etc/resolv.conf
+        owner: root
+        group: root
+        mode: "0644"
