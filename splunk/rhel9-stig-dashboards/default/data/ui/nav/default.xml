@@ -1,0 +1,14 @@
+<nav search_view="search" color="#65A637">
+  <view name="stig_overview" default="true" />
+  <collection label="Compliance Dashboards">
+    <view name="stig_overview" />
+    <view name="stig_sro_events" />
+    <view name="stig_authentication" />
+    <view name="stig_privileged_rights" />
+    <view name="stig_account_events" />
+    <view name="stig_dta_events" />
+    <view name="stig_group_management" />
+    <view name="stig_other_health" />
+  </collection>
+  <view name="search" />
+</nav>

@@ -75,6 +75,12 @@ Key differences from desktop:
 - Larger `/var` (40 GB for repos)
 - Dedicated `/var/lib/docker` (20 GB)
 
+## Splunk Dashboards
+
+A companion Splunk app under [`splunk/rhel9-stig-dashboards/`](splunk/rhel9-stig-dashboards/) ships 8 Dashboard Studio views (1 overview + 7 detail) backed by 117 saved searches across Linux, Cisco, and Palo Alto sources. See [`splunk/rhel9-stig-dashboards/README.md`](splunk/rhel9-stig-dashboards/README.md) for install and deployment notes.
+
+The 7 STIG categories covered are: SRO (Security Relevant Object), Authentication, Privileged Rights, Account Management, DTA (Data Transfer / external media), Group Management, and Audit Health.
+
 ## Related
 
 - [rhel9-desktop-stig](../rhel9-desktop-stig/) — Sibling repo for desktop clients
