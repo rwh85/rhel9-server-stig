@@ -1,0 +1,228 @@
+<dashboard version="2" theme="dark">
+  <label>STIG - Security Relevant Object Events</label>
+  <description>SRO events (Create / Access / Delete / Modify / PermissionModify / OwnershipModify) success and failure. RHEL9 auditd is the only source; Cisco and Palo Alto have no SRO signal.</description>
+  <definition><![CDATA[
+{
+  "visualizations": {
+    "viz_sro_create_success": {
+      "type": "splunk.table",
+      "title": "Create — Success",
+      "dataSources": { "primary": "ds_sro_create_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_sro_create_failure": {
+      "type": "splunk.table",
+      "title": "Create — Failure",
+      "dataSources": { "primary": "ds_sro_create_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_sro_access_success": {
+      "type": "splunk.table",
+      "title": "Access — Success",
+      "dataSources": { "primary": "ds_sro_access_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_sro_access_failure": {
+      "type": "splunk.table",
+      "title": "Access — Failure",
+      "dataSources": { "primary": "ds_sro_access_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_sro_delete_success": {
+      "type": "splunk.table",
+      "title": "Delete — Success",
+      "dataSources": { "primary": "ds_sro_delete_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_sro_delete_failure": {
+      "type": "splunk.table",
+      "title": "Delete — Failure",
+      "dataSources": { "primary": "ds_sro_delete_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_sro_modify_success": {
+      "type": "splunk.table",
+      "title": "Modify — Success",
+      "dataSources": { "primary": "ds_sro_modify_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_sro_modify_failure": {
+      "type": "splunk.table",
+      "title": "Modify — Failure",
+      "dataSources": { "primary": "ds_sro_modify_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_sro_perm_success": {
+      "type": "splunk.table",
+      "title": "Permission Modification — Success",
+      "dataSources": { "primary": "ds_sro_perm_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_sro_perm_failure": {
+      "type": "splunk.table",
+      "title": "Permission Modification — Failure",
+      "dataSources": { "primary": "ds_sro_perm_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_sro_owner_success": {
+      "type": "splunk.table",
+      "title": "Ownership Modification — Success",
+      "dataSources": { "primary": "ds_sro_owner_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_sro_owner_failure": {
+      "type": "splunk.table",
+      "title": "Ownership Modification — Failure",
+      "dataSources": { "primary": "ds_sro_owner_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    }
+  },
+  "dataSources": {
+    "ds_sro_create_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_sro_create_success_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "SRO Create Success"
+    },
+    "ds_sro_create_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_sro_create_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "SRO Create Failure"
+    },
+    "ds_sro_access_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_sro_access_success_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "SRO Access Success"
+    },
+    "ds_sro_access_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_sro_access_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "SRO Access Failure"
+    },
+    "ds_sro_delete_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_sro_delete_success_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "SRO Delete Success"
+    },
+    "ds_sro_delete_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_sro_delete_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "SRO Delete Failure"
+    },
+    "ds_sro_modify_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_sro_modify_success_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "SRO Modify Success"
+    },
+    "ds_sro_modify_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_sro_modify_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "SRO Modify Failure"
+    },
+    "ds_sro_perm_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_sro_perm_modify_success_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "SRO Perm Modify Success"
+    },
+    "ds_sro_perm_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_sro_perm_modify_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "SRO Perm Modify Failure"
+    },
+    "ds_sro_owner_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_sro_owner_modify_success_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "SRO Owner Modify Success"
+    },
+    "ds_sro_owner_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_sro_owner_modify_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "SRO Owner Modify Failure"
+    }
+  },
+  "inputs": {
+    "input_time": {
+      "type": "input.timerange",
+      "title": "Time Range",
+      "options": { "token": "global_time", "defaultValue": "-24h@h,now" }
+    },
+    "input_source": {
+      "type": "input.dropdown",
+      "title": "Source",
+      "options": {
+        "token": "source_filter",
+        "defaultValue": "*",
+        "items": [
+          { "label": "All", "value": "*" },
+          { "label": "linux", "value": "linux" },
+          { "label": "cisco", "value": "cisco" },
+          { "label": "paloalto", "value": "paloalto" }
+        ]
+      }
+    }
+  },
+  "layout": {
+    "type": "absolute",
+    "options": { "width": 1440, "height": 2500, "display": "auto" },
+    "structure": [
+      { "item": "input_time", "type": "input", "position": { "x": 0, "y": 0, "w": 720, "h": 60 } },
+      { "item": "input_source", "type": "input", "position": { "x": 720, "y": 0, "w": 720, "h": 60 } },
+      { "item": "viz_sro_create_success", "type": "block", "position": { "x": 0, "y": 70, "w": 720, "h": 380 } },
+      { "item": "viz_sro_create_failure", "type": "block", "position": { "x": 720, "y": 70, "w": 720, "h": 380 } },
+      { "item": "viz_sro_access_success", "type": "block", "position": { "x": 0, "y": 460, "w": 720, "h": 380 } },
+      { "item": "viz_sro_access_failure", "type": "block", "position": { "x": 720, "y": 460, "w": 720, "h": 380 } },
+      { "item": "viz_sro_delete_success", "type": "block", "position": { "x": 0, "y": 850, "w": 720, "h": 380 } },
+      { "item": "viz_sro_delete_failure", "type": "block", "position": { "x": 720, "y": 850, "w": 720, "h": 380 } },
+      { "item": "viz_sro_modify_success", "type": "block", "position": { "x": 0, "y": 1240, "w": 720, "h": 380 } },
+      { "item": "viz_sro_modify_failure", "type": "block", "position": { "x": 720, "y": 1240, "w": 720, "h": 380 } },
+      { "item": "viz_sro_perm_success", "type": "block", "position": { "x": 0, "y": 1630, "w": 720, "h": 380 } },
+      { "item": "viz_sro_perm_failure", "type": "block", "position": { "x": 720, "y": 1630, "w": 720, "h": 380 } },
+      { "item": "viz_sro_owner_success", "type": "block", "position": { "x": 0, "y": 2020, "w": 720, "h": 380 } },
+      { "item": "viz_sro_owner_failure", "type": "block", "position": { "x": 720, "y": 2020, "w": 720, "h": 380 } }
+    ]
+  },
+  "title": "STIG - Security Relevant Object Events",
+  "description": "SRO events across RHEL9 auditd.",
+  "defaults": {
+    "dataSources": {
+      "ds.search": { "options": { "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" } } }
+    }
+  }
+}
+]]></definition>
+</dashboard>

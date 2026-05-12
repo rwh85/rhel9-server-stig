@@ -1,0 +1,206 @@
+<dashboard version="2" theme="dark">
+  <label>STIG - Overview</label>
+  <description>STIG compliance overview across RHEL9, Cisco, and Palo Alto sources. Tiles link to detail dashboards; single-value panels show 24h failure counts per category.</description>
+  <definition><![CDATA[
+{
+  "visualizations": {
+    "viz_sv_sro": {
+      "type": "splunk.singlevalue",
+      "title": "SRO Failures (24h)",
+      "dataSources": { "primary": "ds_sv_sro" },
+      "options": {
+        "majorColor": "> trendValue | rangeValue(majorColorEditorConfig)",
+        "majorColorEditorConfig": [
+          { "from": 0, "to": 1, "value": "#118832" },
+          { "from": 1, "value": "#d41f1f" }
+        ],
+        "sparklineDisplay": "off"
+      }
+    },
+    "viz_sv_auth": {
+      "type": "splunk.singlevalue",
+      "title": "Authentication Failures (24h)",
+      "dataSources": { "primary": "ds_sv_auth" },
+      "options": {
+        "majorColor": "> trendValue | rangeValue(majorColorEditorConfig)",
+        "majorColorEditorConfig": [
+          { "from": 0, "to": 1, "value": "#118832" },
+          { "from": 1, "value": "#d41f1f" }
+        ],
+        "sparklineDisplay": "off"
+      }
+    },
+    "viz_sv_priv": {
+      "type": "splunk.singlevalue",
+      "title": "Privileged Failures (24h)",
+      "dataSources": { "primary": "ds_sv_priv" },
+      "options": {
+        "majorColor": "> trendValue | rangeValue(majorColorEditorConfig)",
+        "majorColorEditorConfig": [
+          { "from": 0, "to": 1, "value": "#118832" },
+          { "from": 1, "value": "#d41f1f" }
+        ],
+        "sparklineDisplay": "off"
+      }
+    },
+    "viz_sv_account": {
+      "type": "splunk.singlevalue",
+      "title": "Account Failures (24h)",
+      "dataSources": { "primary": "ds_sv_account" },
+      "options": {
+        "majorColor": "> trendValue | rangeValue(majorColorEditorConfig)",
+        "majorColorEditorConfig": [
+          { "from": 0, "to": 1, "value": "#118832" },
+          { "from": 1, "value": "#d41f1f" }
+        ],
+        "sparklineDisplay": "off"
+      }
+    },
+    "viz_sv_dta": {
+      "type": "splunk.singlevalue",
+      "title": "DTA Failures (24h)",
+      "dataSources": { "primary": "ds_sv_dta" },
+      "options": {
+        "majorColor": "> trendValue | rangeValue(majorColorEditorConfig)",
+        "majorColorEditorConfig": [
+          { "from": 0, "to": 1, "value": "#118832" },
+          { "from": 1, "value": "#d41f1f" }
+        ],
+        "sparklineDisplay": "off"
+      }
+    },
+    "viz_sv_group": {
+      "type": "splunk.singlevalue",
+      "title": "Group Mgmt Failures (24h)",
+      "dataSources": { "primary": "ds_sv_group" },
+      "options": {
+        "majorColor": "> trendValue | rangeValue(majorColorEditorConfig)",
+        "majorColorEditorConfig": [
+          { "from": 0, "to": 1, "value": "#118832" },
+          { "from": 1, "value": "#d41f1f" }
+        ],
+        "sparklineDisplay": "off"
+      }
+    },
+    "viz_timechart": {
+      "type": "splunk.line",
+      "title": "Total events by source_type (24h)",
+      "dataSources": { "primary": "ds_timechart" },
+      "options": {
+        "legendDisplay": "right",
+        "xAxisTitleText": "time",
+        "yAxisTitleText": "events"
+      }
+    },
+    "viz_links": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "## STIG Detail Dashboards\n\n- [Security Relevant Object Events](/app/rhel9-stig-dashboards/stig_sro_events)\n- [Authentication](/app/rhel9-stig-dashboards/stig_authentication)\n- [Privileged Rights](/app/rhel9-stig-dashboards/stig_privileged_rights)\n- [Account Events](/app/rhel9-stig-dashboards/stig_account_events)\n- [Data Transfer (DTA)](/app/rhel9-stig-dashboards/stig_dta_events)\n- [Group Management](/app/rhel9-stig-dashboards/stig_group_management)\n- [Audit Health](/app/rhel9-stig-dashboards/stig_other_health)\n"
+      }
+    }
+  },
+  "dataSources": {
+    "ds_sv_sro": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_sro_create_failure_linux | append [| savedsearch stig_sro_access_failure_linux] | append [| savedsearch stig_sro_delete_failure_linux] | append [| savedsearch stig_sro_modify_failure_linux] | append [| savedsearch stig_sro_perm_modify_failure_linux] | append [| savedsearch stig_sro_owner_modify_failure_linux] | search source_type=$source_filter:value$ | stats count",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "SRO failures rollup"
+    },
+    "ds_sv_auth": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_auth_logon_failure_linux | append [| savedsearch stig_auth_logoff_failure_linux] | append [| savedsearch stig_auth_logon_failure_cisco] | append [| savedsearch stig_auth_logon_fail_pan_admin] | append [| savedsearch stig_auth_logon_fail_pan_gp] | search source_type=$source_filter:value$ | stats count",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Auth failures rollup"
+    },
+    "ds_sv_priv": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_priv_audit_policy_change_failure_linux | append [| savedsearch stig_priv_mac_policy_change_failure_linux] | append [| savedsearch stig_priv_config_change_failure_linux] | append [| savedsearch stig_priv_root_access_failure_linux] | append [| savedsearch stig_priv_escalation_failure_linux] | append [| savedsearch stig_priv_audit_log_access_failure_linux] | append [| savedsearch stig_priv_system_boot_failure_linux] | append [| savedsearch stig_priv_password_reset_failure_linux] | append [| savedsearch stig_priv_config_change_failure_cisco] | append [| savedsearch stig_priv_escalation_failure_cisco] | append [| savedsearch stig_priv_root_access_failure_cisco] | append [| savedsearch stig_priv_password_reset_failure_cisco] | append [| savedsearch stig_priv_config_commit_fail_pan] | append [| savedsearch stig_priv_policy_change_fail_pan] | search source_type=$source_filter:value$ | stats count",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Privileged failures rollup"
+    },
+    "ds_sv_account": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_account_create_failure_linux | append [| savedsearch stig_account_modify_failure_linux] | append [| savedsearch stig_account_delete_failure_linux] | append [| savedsearch stig_account_disable_failure_linux] | append [| savedsearch stig_account_enable_failure_linux] | append [| savedsearch stig_account_add_failure_cisco] | append [| savedsearch stig_account_modify_failure_cisco] | append [| savedsearch stig_account_delete_failure_cisco] | append [| savedsearch stig_account_create_fail_pan] | append [| savedsearch stig_account_delete_fail_pan] | search source_type=$source_filter:value$ | stats count",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Account failures rollup"
+    },
+    "ds_sv_dta": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_dta_external_media_write_failure_linux | append [| savedsearch stig_dta_export_failure_cisco] | append [| savedsearch stig_dta_import_failure_cisco] | append [| savedsearch stig_dta_config_export_fail_pan] | append [| savedsearch stig_dta_config_import_fail_pan] | search source_type=$source_filter:value$ | stats count",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "DTA failures rollup"
+    },
+    "ds_sv_group": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_group_create_failure_linux | append [| savedsearch stig_group_modify_failure_linux] | append [| savedsearch stig_group_delete_failure_linux] | append [| savedsearch stig_group_membership_change_failure_linux] | append [| savedsearch stig_groupmgmt_add_failure_cisco] | append [| savedsearch stig_groupmgmt_delete_failure_cisco] | append [| savedsearch stig_groupmgmt_role_create_fail_pan] | append [| savedsearch stig_groupmgmt_role_delete_fail_pan] | append [| savedsearch stig_groupmgmt_user_role_assign_fail_pan] | search source_type=$source_filter:value$ | stats count",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Group mgmt failures rollup"
+    },
+    "ds_timechart": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=os_linux OR index=network | timechart span=1h count by sourcetype",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Events by source_type"
+    }
+  },
+  "inputs": {
+    "input_time": {
+      "type": "input.timerange",
+      "title": "Time Range",
+      "options": { "token": "global_time", "defaultValue": "-24h@h,now" }
+    },
+    "input_source": {
+      "type": "input.dropdown",
+      "title": "Source",
+      "options": {
+        "token": "source_filter",
+        "defaultValue": "*",
+        "items": [
+          { "label": "All", "value": "*" },
+          { "label": "linux", "value": "linux" },
+          { "label": "cisco", "value": "cisco" },
+          { "label": "paloalto", "value": "paloalto" }
+        ]
+      }
+    }
+  },
+  "layout": {
+    "type": "absolute",
+    "options": { "width": 1440, "height": 1200, "display": "auto" },
+    "structure": [
+      { "item": "input_time", "type": "input", "position": { "x": 0, "y": 0, "w": 720, "h": 60 } },
+      { "item": "input_source", "type": "input", "position": { "x": 720, "y": 0, "w": 720, "h": 60 } },
+      { "item": "viz_sv_sro", "type": "block", "position": { "x": 0, "y": 70, "w": 240, "h": 180 } },
+      { "item": "viz_sv_auth", "type": "block", "position": { "x": 240, "y": 70, "w": 240, "h": 180 } },
+      { "item": "viz_sv_priv", "type": "block", "position": { "x": 480, "y": 70, "w": 240, "h": 180 } },
+      { "item": "viz_sv_account", "type": "block", "position": { "x": 720, "y": 70, "w": 240, "h": 180 } },
+      { "item": "viz_sv_dta", "type": "block", "position": { "x": 960, "y": 70, "w": 240, "h": 180 } },
+      { "item": "viz_sv_group", "type": "block", "position": { "x": 1200, "y": 70, "w": 240, "h": 180 } },
+      { "item": "viz_timechart", "type": "block", "position": { "x": 0, "y": 260, "w": 1440, "h": 420 } },
+      { "item": "viz_links", "type": "block", "position": { "x": 0, "y": 690, "w": 1440, "h": 480 } }
+    ]
+  },
+  "title": "STIG - Overview",
+  "description": "STIG compliance overview across RHEL9, Cisco, and Palo Alto sources.",
+  "defaults": {
+    "dataSources": {
+      "ds.search": { "options": { "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" } } }
+    }
+  }
+}
+]]></definition>
+</dashboard>
