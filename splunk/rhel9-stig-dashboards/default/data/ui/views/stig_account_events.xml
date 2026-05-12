@@ -1,0 +1,198 @@
+<dashboard version="2" theme="dark">
+  <label>STIG - Account Events</label>
+  <description>STIG-aligned Account events (Create / Modify / Disable / Enable / Delete) across RHEL9, Cisco, and Palo Alto sources.</description>
+  <definition><![CDATA[
+{
+  "visualizations": {
+    "viz_account_create_success": {
+      "type": "splunk.table",
+      "title": "Account Create — Success",
+      "dataSources": { "primary": "ds_account_create_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_account_create_failure": {
+      "type": "splunk.table",
+      "title": "Account Create — Failure",
+      "dataSources": { "primary": "ds_account_create_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_account_modify_success": {
+      "type": "splunk.table",
+      "title": "Account Modify — Success",
+      "dataSources": { "primary": "ds_account_modify_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_account_modify_failure": {
+      "type": "splunk.table",
+      "title": "Account Modify — Failure",
+      "dataSources": { "primary": "ds_account_modify_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_account_disable_success": {
+      "type": "splunk.table",
+      "title": "Account Disable — Success",
+      "dataSources": { "primary": "ds_account_disable_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_account_disable_failure": {
+      "type": "splunk.table",
+      "title": "Account Disable — Failure",
+      "dataSources": { "primary": "ds_account_disable_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_account_enable_success": {
+      "type": "splunk.table",
+      "title": "Account Enable — Success",
+      "dataSources": { "primary": "ds_account_enable_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_account_enable_failure": {
+      "type": "splunk.table",
+      "title": "Account Enable — Failure",
+      "dataSources": { "primary": "ds_account_enable_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_account_delete_success": {
+      "type": "splunk.table",
+      "title": "Account Delete — Success",
+      "dataSources": { "primary": "ds_account_delete_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_account_delete_failure": {
+      "type": "splunk.table",
+      "title": "Account Delete — Failure",
+      "dataSources": { "primary": "ds_account_delete_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    }
+  },
+  "dataSources": {
+    "ds_account_create_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_account_create_success_linux | append [| savedsearch stig_account_add_success_cisco] | append [| savedsearch stig_account_create_success_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Account Create Success (all sources)"
+    },
+    "ds_account_create_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_account_create_failure_linux | append [| savedsearch stig_account_add_failure_cisco] | append [| savedsearch stig_account_create_fail_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Account Create Failure (all sources)"
+    },
+    "ds_account_modify_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_account_modify_success_linux | append [| savedsearch stig_account_modify_success_cisco] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Account Modify Success (linux + cisco)"
+    },
+    "ds_account_modify_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_account_modify_failure_linux | append [| savedsearch stig_account_modify_failure_cisco] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Account Modify Failure (linux + cisco)"
+    },
+    "ds_account_disable_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_account_disable_success_linux | append [| savedsearch stig_account_disable_success_cisco] | append [| savedsearch stig_account_disable_success_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Account Disable Success (all sources)"
+    },
+    "ds_account_disable_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_account_disable_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Account Disable Failure (linux only)"
+    },
+    "ds_account_enable_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_account_enable_success_linux | append [| savedsearch stig_account_enable_success_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Account Enable Success (linux + pan)"
+    },
+    "ds_account_enable_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_account_enable_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Account Enable Failure (linux only)"
+    },
+    "ds_account_delete_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_account_delete_success_linux | append [| savedsearch stig_account_delete_success_cisco] | append [| savedsearch stig_account_delete_success_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Account Delete Success (all sources)"
+    },
+    "ds_account_delete_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_account_delete_failure_linux | append [| savedsearch stig_account_delete_failure_cisco] | append [| savedsearch stig_account_delete_fail_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Account Delete Failure (all sources)"
+    }
+  },
+  "inputs": {
+    "input_time": {
+      "type": "input.timerange",
+      "title": "Time Range",
+      "options": { "token": "global_time", "defaultValue": "-24h@h,now" }
+    },
+    "input_source": {
+      "type": "input.dropdown",
+      "title": "Source",
+      "options": {
+        "token": "source_filter",
+        "defaultValue": "*",
+        "items": [
+          { "label": "All", "value": "*" },
+          { "label": "linux", "value": "linux" },
+          { "label": "cisco", "value": "cisco" },
+          { "label": "paloalto", "value": "paloalto" }
+        ]
+      }
+    }
+  },
+  "layout": {
+    "type": "absolute",
+    "options": { "width": 1440, "height": 2030, "display": "auto" },
+    "structure": [
+      { "item": "input_time", "type": "input", "position": { "x": 0, "y": 0, "w": 720, "h": 60 } },
+      { "item": "input_source", "type": "input", "position": { "x": 720, "y": 0, "w": 720, "h": 60 } },
+      { "item": "viz_account_create_success", "type": "block", "position": { "x": 0, "y": 70, "w": 720, "h": 380 } },
+      { "item": "viz_account_create_failure", "type": "block", "position": { "x": 720, "y": 70, "w": 720, "h": 380 } },
+      { "item": "viz_account_modify_success", "type": "block", "position": { "x": 0, "y": 460, "w": 720, "h": 380 } },
+      { "item": "viz_account_modify_failure", "type": "block", "position": { "x": 720, "y": 460, "w": 720, "h": 380 } },
+      { "item": "viz_account_disable_success", "type": "block", "position": { "x": 0, "y": 850, "w": 720, "h": 380 } },
+      { "item": "viz_account_disable_failure", "type": "block", "position": { "x": 720, "y": 850, "w": 720, "h": 380 } },
+      { "item": "viz_account_enable_success", "type": "block", "position": { "x": 0, "y": 1240, "w": 720, "h": 380 } },
+      { "item": "viz_account_enable_failure", "type": "block", "position": { "x": 720, "y": 1240, "w": 720, "h": 380 } },
+      { "item": "viz_account_delete_success", "type": "block", "position": { "x": 0, "y": 1630, "w": 720, "h": 380 } },
+      { "item": "viz_account_delete_failure", "type": "block", "position": { "x": 720, "y": 1630, "w": 720, "h": 380 } }
+    ]
+  },
+  "title": "STIG - Account Events",
+  "description": "Account events across RHEL9, Cisco, Palo Alto.",
+  "defaults": {
+    "dataSources": {
+      "ds.search": { "options": { "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" } } }
+    }
+  }
+}
+]]></definition>
+</dashboard>
