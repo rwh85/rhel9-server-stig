@@ -1,0 +1,341 @@
+<dashboard version="2" theme="dark">
+  <label>STIG - Privileged Rights Events</label>
+  <description>STIG-aligned Privileged Rights events: audit/MAC/security policy changes, configuration changes, root access, privilege escalation, audit log access, reboot/shutdown, password reset, account lockout/unlock. Sources: RHEL9, Cisco, Palo Alto.</description>
+  <definition><![CDATA[
+{
+  "visualizations": {
+    "viz_audit_policy_success": {
+      "type": "splunk.table",
+      "title": "Audit Policy Change — Success",
+      "dataSources": { "primary": "ds_audit_policy_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_audit_policy_failure": {
+      "type": "splunk.table",
+      "title": "Audit Policy Change — Failure",
+      "dataSources": { "primary": "ds_audit_policy_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_mac_policy_success": {
+      "type": "splunk.table",
+      "title": "MAC Policy Change — Success",
+      "dataSources": { "primary": "ds_mac_policy_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_mac_policy_failure": {
+      "type": "splunk.table",
+      "title": "MAC Policy Change — Failure",
+      "dataSources": { "primary": "ds_mac_policy_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_security_policy_success": {
+      "type": "splunk.table",
+      "title": "Security/Audit Policy Change (PAN) — Success",
+      "dataSources": { "primary": "ds_security_policy_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_security_policy_failure": {
+      "type": "splunk.table",
+      "title": "Security/Audit Policy Change (PAN) — Failure",
+      "dataSources": { "primary": "ds_security_policy_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_config_change_success": {
+      "type": "splunk.table",
+      "title": "Configuration Change — Success",
+      "dataSources": { "primary": "ds_config_change_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_config_change_failure": {
+      "type": "splunk.table",
+      "title": "Configuration Change — Failure",
+      "dataSources": { "primary": "ds_config_change_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_root_access_success": {
+      "type": "splunk.table",
+      "title": "Root / Breakglass Access — Success",
+      "dataSources": { "primary": "ds_root_access_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_root_access_failure": {
+      "type": "splunk.table",
+      "title": "Root / Breakglass Access — Failure",
+      "dataSources": { "primary": "ds_root_access_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_escalation_success": {
+      "type": "splunk.table",
+      "title": "Privilege Escalation — Success",
+      "dataSources": { "primary": "ds_escalation_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_escalation_failure": {
+      "type": "splunk.table",
+      "title": "Privilege Escalation — Failure",
+      "dataSources": { "primary": "ds_escalation_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_audit_log_access_success": {
+      "type": "splunk.table",
+      "title": "Audit Log Access — Success",
+      "dataSources": { "primary": "ds_audit_log_access_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_audit_log_access_failure": {
+      "type": "splunk.table",
+      "title": "Audit Log Access — Failure",
+      "dataSources": { "primary": "ds_audit_log_access_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_reboot_success": {
+      "type": "splunk.table",
+      "title": "Reboot / Shutdown — Success",
+      "dataSources": { "primary": "ds_reboot_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_reboot_failure": {
+      "type": "splunk.table",
+      "title": "Reboot / Shutdown — Failure",
+      "dataSources": { "primary": "ds_reboot_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_password_reset_success": {
+      "type": "splunk.table",
+      "title": "Password Reset — Success",
+      "dataSources": { "primary": "ds_password_reset_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_password_reset_failure": {
+      "type": "splunk.table",
+      "title": "Password Reset — Failure",
+      "dataSources": { "primary": "ds_password_reset_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_account_unlock_success": {
+      "type": "splunk.table",
+      "title": "Account Lockout / Unlock — Success",
+      "dataSources": { "primary": "ds_account_unlock_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_account_unlock_failure": {
+      "type": "splunk.markdown",
+      "title": "Account Lockout / Unlock — Failure",
+      "options": {
+        "markdown": "**N/A** — no log signal available from configured sources for failed account lockout/unlock events."
+      }
+    }
+  },
+  "dataSources": {
+    "ds_audit_policy_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_priv_audit_policy_change_success_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Audit Policy Change Success"
+    },
+    "ds_audit_policy_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_priv_audit_policy_change_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Audit Policy Change Failure"
+    },
+    "ds_mac_policy_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_priv_mac_policy_change_success_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "MAC Policy Change Success"
+    },
+    "ds_mac_policy_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_priv_mac_policy_change_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "MAC Policy Change Failure"
+    },
+    "ds_security_policy_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_priv_policy_change_success_pan | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "PAN Security/Audit Policy Change Success"
+    },
+    "ds_security_policy_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_priv_policy_change_fail_pan | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "PAN Security/Audit Policy Change Failure"
+    },
+    "ds_config_change_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_priv_config_change_success_linux | append [| savedsearch stig_priv_config_change_success_cisco] | append [| savedsearch stig_priv_config_commit_success_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Config Change Success (all sources)"
+    },
+    "ds_config_change_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_priv_config_change_failure_linux | append [| savedsearch stig_priv_config_change_failure_cisco] | append [| savedsearch stig_priv_config_commit_fail_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Config Change Failure (all sources)"
+    },
+    "ds_root_access_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_priv_root_access_success_linux | append [| savedsearch stig_priv_root_access_success_cisco] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Root Access Success (linux + cisco)"
+    },
+    "ds_root_access_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_priv_root_access_failure_linux | append [| savedsearch stig_priv_root_access_failure_cisco] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Root Access Failure (linux + cisco)"
+    },
+    "ds_escalation_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_priv_escalation_success_linux | append [| savedsearch stig_priv_escalation_success_cisco] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Privilege Escalation Success (linux + cisco)"
+    },
+    "ds_escalation_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_priv_escalation_failure_linux | append [| savedsearch stig_priv_escalation_failure_cisco] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Privilege Escalation Failure (linux + cisco)"
+    },
+    "ds_audit_log_access_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_priv_audit_log_access_success_linux | append [| savedsearch stig_priv_audit_log_access_cisco] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Audit Log Access Success (linux + cisco)"
+    },
+    "ds_audit_log_access_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_priv_audit_log_access_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Audit Log Access Failure (linux only)"
+    },
+    "ds_reboot_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_priv_system_boot_success_linux | append [| savedsearch stig_priv_system_reboot_success_cisco] | append [| savedsearch stig_priv_system_reboot_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Reboot / Shutdown Success (all sources)"
+    },
+    "ds_reboot_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_priv_system_boot_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Reboot / Shutdown Failure (linux only)"
+    },
+    "ds_password_reset_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_priv_password_reset_success_linux | append [| savedsearch stig_priv_password_reset_success_cisco] | append [| savedsearch stig_priv_password_reset_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Password Reset Success (all sources)"
+    },
+    "ds_password_reset_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_priv_password_reset_failure_linux | append [| savedsearch stig_priv_password_reset_failure_cisco] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Password Reset Failure (linux + cisco)"
+    },
+    "ds_account_unlock_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_priv_account_lockout_pan | append [| savedsearch stig_priv_account_unlock_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "PAN Account Lockout / Unlock Success"
+    }
+  },
+  "inputs": {
+    "input_time": {
+      "type": "input.timerange",
+      "title": "Time Range",
+      "options": { "token": "global_time", "defaultValue": "-24h@h,now" }
+    },
+    "input_source": {
+      "type": "input.dropdown",
+      "title": "Source",
+      "options": {
+        "token": "source_filter",
+        "defaultValue": "*",
+        "items": [
+          { "label": "All", "value": "*" },
+          { "label": "linux", "value": "linux" },
+          { "label": "cisco", "value": "cisco" },
+          { "label": "paloalto", "value": "paloalto" }
+        ]
+      }
+    }
+  },
+  "layout": {
+    "type": "absolute",
+    "options": { "width": 1440, "height": 3960, "display": "auto" },
+    "structure": [
+      { "item": "input_time", "type": "input", "position": { "x": 0, "y": 0, "w": 720, "h": 60 } },
+      { "item": "input_source", "type": "input", "position": { "x": 720, "y": 0, "w": 720, "h": 60 } },
+      { "item": "viz_audit_policy_success", "type": "block", "position": { "x": 0, "y": 70, "w": 720, "h": 380 } },
+      { "item": "viz_audit_policy_failure", "type": "block", "position": { "x": 720, "y": 70, "w": 720, "h": 380 } },
+      { "item": "viz_mac_policy_success", "type": "block", "position": { "x": 0, "y": 460, "w": 720, "h": 380 } },
+      { "item": "viz_mac_policy_failure", "type": "block", "position": { "x": 720, "y": 460, "w": 720, "h": 380 } },
+      { "item": "viz_security_policy_success", "type": "block", "position": { "x": 0, "y": 850, "w": 720, "h": 380 } },
+      { "item": "viz_security_policy_failure", "type": "block", "position": { "x": 720, "y": 850, "w": 720, "h": 380 } },
+      { "item": "viz_config_change_success", "type": "block", "position": { "x": 0, "y": 1240, "w": 720, "h": 380 } },
+      { "item": "viz_config_change_failure", "type": "block", "position": { "x": 720, "y": 1240, "w": 720, "h": 380 } },
+      { "item": "viz_root_access_success", "type": "block", "position": { "x": 0, "y": 1630, "w": 720, "h": 380 } },
+      { "item": "viz_root_access_failure", "type": "block", "position": { "x": 720, "y": 1630, "w": 720, "h": 380 } },
+      { "item": "viz_escalation_success", "type": "block", "position": { "x": 0, "y": 2020, "w": 720, "h": 380 } },
+      { "item": "viz_escalation_failure", "type": "block", "position": { "x": 720, "y": 2020, "w": 720, "h": 380 } },
+      { "item": "viz_audit_log_access_success", "type": "block", "position": { "x": 0, "y": 2410, "w": 720, "h": 380 } },
+      { "item": "viz_audit_log_access_failure", "type": "block", "position": { "x": 720, "y": 2410, "w": 720, "h": 380 } },
+      { "item": "viz_reboot_success", "type": "block", "position": { "x": 0, "y": 2800, "w": 720, "h": 380 } },
+      { "item": "viz_reboot_failure", "type": "block", "position": { "x": 720, "y": 2800, "w": 720, "h": 380 } },
+      { "item": "viz_password_reset_success", "type": "block", "position": { "x": 0, "y": 3190, "w": 720, "h": 380 } },
+      { "item": "viz_password_reset_failure", "type": "block", "position": { "x": 720, "y": 3190, "w": 720, "h": 380 } },
+      { "item": "viz_account_unlock_success", "type": "block", "position": { "x": 0, "y": 3580, "w": 720, "h": 380 } },
+      { "item": "viz_account_unlock_failure", "type": "block", "position": { "x": 720, "y": 3580, "w": 720, "h": 380 } }
+    ]
+  },
+  "title": "STIG - Privileged Rights Events",
+  "description": "Privileged Rights events across RHEL9, Cisco, Palo Alto.",
+  "defaults": {
+    "dataSources": {
+      "ds.search": { "options": { "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" } } }
+    }
+  }
+}
+]]></definition>
+</dashboard>

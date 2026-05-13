@@ -1,0 +1,168 @@
+<dashboard version="2" theme="dark">
+  <label>STIG - Group Management Events</label>
+  <description>STIG-aligned Group / Role management events (Add / Modify / Delete + user-to-group / user-to-role mapping changes) across RHEL9, Cisco, and Palo Alto sources.</description>
+  <definition><![CDATA[
+{
+  "visualizations": {
+    "viz_group_create_success": {
+      "type": "splunk.table",
+      "title": "Group / Role Create — Success",
+      "dataSources": { "primary": "ds_group_create_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_group_create_failure": {
+      "type": "splunk.table",
+      "title": "Group / Role Create — Failure",
+      "dataSources": { "primary": "ds_group_create_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_group_modify_success": {
+      "type": "splunk.table",
+      "title": "Group / Role Modify — Success",
+      "dataSources": { "primary": "ds_group_modify_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_group_modify_failure": {
+      "type": "splunk.table",
+      "title": "Group / Role Modify — Failure",
+      "dataSources": { "primary": "ds_group_modify_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_group_delete_success": {
+      "type": "splunk.table",
+      "title": "Group / Role Delete — Success",
+      "dataSources": { "primary": "ds_group_delete_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_group_delete_failure": {
+      "type": "splunk.table",
+      "title": "Group / Role Delete — Failure",
+      "dataSources": { "primary": "ds_group_delete_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_membership_success": {
+      "type": "splunk.table",
+      "title": "User-to-Group / Role Membership Change — Success",
+      "dataSources": { "primary": "ds_membership_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_membership_failure": {
+      "type": "splunk.table",
+      "title": "User-to-Group / Role Membership Change — Failure",
+      "dataSources": { "primary": "ds_membership_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    }
+  },
+  "dataSources": {
+    "ds_group_create_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_group_create_success_linux | append [| savedsearch stig_groupmgmt_add_success_cisco] | append [| savedsearch stig_groupmgmt_role_create_success_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Group/Role Create Success (all sources)"
+    },
+    "ds_group_create_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_group_create_failure_linux | append [| savedsearch stig_groupmgmt_add_failure_cisco] | append [| savedsearch stig_groupmgmt_role_create_fail_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Group/Role Create Failure (all sources)"
+    },
+    "ds_group_modify_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_group_modify_success_linux | append [| savedsearch stig_groupmgmt_modify_success_cisco] | append [| savedsearch stig_groupmgmt_role_create_success_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Group/Role Modify Success (linux + cisco + pan)"
+    },
+    "ds_group_modify_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_group_modify_failure_linux | append [| savedsearch stig_groupmgmt_role_create_fail_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Group/Role Modify Failure (linux + pan; cisco N/A)"
+    },
+    "ds_group_delete_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_group_delete_success_linux | append [| savedsearch stig_groupmgmt_delete_success_cisco] | append [| savedsearch stig_groupmgmt_role_delete_success_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Group/Role Delete Success (all sources)"
+    },
+    "ds_group_delete_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_group_delete_failure_linux | append [| savedsearch stig_groupmgmt_delete_failure_cisco] | append [| savedsearch stig_groupmgmt_role_delete_fail_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Group/Role Delete Failure (all sources)"
+    },
+    "ds_membership_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_group_membership_change_success_linux | append [| savedsearch stig_groupmgmt_user_role_assign_success_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Membership Change Success (linux + pan)"
+    },
+    "ds_membership_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_group_membership_change_failure_linux | append [| savedsearch stig_groupmgmt_user_role_assign_fail_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Membership Change Failure (linux + pan)"
+    }
+  },
+  "inputs": {
+    "input_time": {
+      "type": "input.timerange",
+      "title": "Time Range",
+      "options": { "token": "global_time", "defaultValue": "-24h@h,now" }
+    },
+    "input_source": {
+      "type": "input.dropdown",
+      "title": "Source",
+      "options": {
+        "token": "source_filter",
+        "defaultValue": "*",
+        "items": [
+          { "label": "All", "value": "*" },
+          { "label": "linux", "value": "linux" },
+          { "label": "cisco", "value": "cisco" },
+          { "label": "paloalto", "value": "paloalto" }
+        ]
+      }
+    }
+  },
+  "layout": {
+    "type": "absolute",
+    "options": { "width": 1440, "height": 1670, "display": "auto" },
+    "structure": [
+      { "item": "input_time", "type": "input", "position": { "x": 0, "y": 0, "w": 720, "h": 60 } },
+      { "item": "input_source", "type": "input", "position": { "x": 720, "y": 0, "w": 720, "h": 60 } },
+      { "item": "viz_group_create_success", "type": "block", "position": { "x": 0, "y": 70, "w": 720, "h": 380 } },
+      { "item": "viz_group_create_failure", "type": "block", "position": { "x": 720, "y": 70, "w": 720, "h": 380 } },
+      { "item": "viz_group_modify_success", "type": "block", "position": { "x": 0, "y": 460, "w": 720, "h": 380 } },
+      { "item": "viz_group_modify_failure", "type": "block", "position": { "x": 720, "y": 460, "w": 720, "h": 380 } },
+      { "item": "viz_group_delete_success", "type": "block", "position": { "x": 0, "y": 850, "w": 720, "h": 380 } },
+      { "item": "viz_group_delete_failure", "type": "block", "position": { "x": 720, "y": 850, "w": 720, "h": 380 } },
+      { "item": "viz_membership_success", "type": "block", "position": { "x": 0, "y": 1240, "w": 720, "h": 380 } },
+      { "item": "viz_membership_failure", "type": "block", "position": { "x": 720, "y": 1240, "w": 720, "h": 380 } }
+    ]
+  },
+  "title": "STIG - Group Management Events",
+  "description": "Group/Role management events across RHEL9, Cisco, Palo Alto.",
+  "defaults": {
+    "dataSources": {
+      "ds.search": { "options": { "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" } } }
+    }
+  }
+}
+]]></definition>
+</dashboard>

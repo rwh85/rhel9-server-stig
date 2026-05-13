@@ -1,0 +1,116 @@
+<dashboard version="2" theme="dark">
+  <label>STIG - Audit Health</label>
+  <description>STIG-aligned audit subsystem health events: audit storage 75% utilization warnings and audit processing failures. Sources: RHEL9 auditd and Palo Alto PAN-OS system logs. Cisco is N/A: device-side audit-storage health lives on the Splunk indexer/forwarder side.</description>
+  <definition><![CDATA[
+{
+  "visualizations": {
+    "viz_audit_storage_success": {
+      "type": "splunk.markdown",
+      "title": "Audit Storage 75% Utilization — Success / Healthy",
+      "options": {
+        "markdown": "**N/A** — audit-storage health is reported only as a failure / warning condition. A 'healthy' steady-state event has no log signal from any configured source."
+      }
+    },
+    "viz_audit_storage_failure": {
+      "type": "splunk.table",
+      "title": "Audit Storage 75% Utilization — Warning / Failure",
+      "dataSources": { "primary": "ds_audit_storage_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_audit_processing_success": {
+      "type": "splunk.markdown",
+      "title": "Audit Processing — Success / Healthy",
+      "options": {
+        "markdown": "**N/A** — audit-processing health is reported only as a failure condition. A 'healthy' steady-state event has no log signal from any configured source."
+      }
+    },
+    "viz_audit_processing_failure": {
+      "type": "splunk.table",
+      "title": "Audit Processing — Failure",
+      "dataSources": { "primary": "ds_audit_processing_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_log_forwarding_failure": {
+      "type": "splunk.table",
+      "title": "Log Forwarding — Failure (PAN)",
+      "dataSources": { "primary": "ds_log_forwarding_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_health_note": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### Coverage notes\n\n- **RHEL9 (auditd):** disk-full / disk-warn signals from `DAEMON_RESOURCE`, `DAEMON_END reason=disk-full`, syslog `disk_full_action` / `audit_log_full` / `remaining space is low` / `No space left on device`.\n- **Palo Alto:** `pan:system subtype=general` high/critical/medium severity with disk/log-partition wording for storage; `pan:system` log-receiver / logd daemon errors for processing; syslog/log-forwarding failure messages for log forwarding.\n- **Cisco:** N/A. Device-side audit storage and processing health are governed by the Splunk indexer/forwarder, not by the network device itself."
+      }
+    }
+  },
+  "dataSources": {
+    "ds_audit_storage_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_health_audit_storage_warning_linux | append [| savedsearch stig_health_disk_usage_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Audit Storage Warning (linux + pan)"
+    },
+    "ds_audit_processing_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_health_audit_processing_failure_linux | append [| savedsearch stig_health_audit_processing_fail_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Audit Processing Failure (linux + pan)"
+    },
+    "ds_log_forwarding_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_health_log_forwarding_fail_pan | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Log Forwarding Failure (pan only)"
+    }
+  },
+  "inputs": {
+    "input_time": {
+      "type": "input.timerange",
+      "title": "Time Range",
+      "options": { "token": "global_time", "defaultValue": "-24h@h,now" }
+    },
+    "input_source": {
+      "type": "input.dropdown",
+      "title": "Source",
+      "options": {
+        "token": "source_filter",
+        "defaultValue": "*",
+        "items": [
+          { "label": "All", "value": "*" },
+          { "label": "linux", "value": "linux" },
+          { "label": "cisco", "value": "cisco" },
+          { "label": "paloalto", "value": "paloalto" }
+        ]
+      }
+    }
+  },
+  "layout": {
+    "type": "absolute",
+    "options": { "width": 1440, "height": 1500, "display": "auto" },
+    "structure": [
+      { "item": "input_time", "type": "input", "position": { "x": 0, "y": 0, "w": 720, "h": 60 } },
+      { "item": "input_source", "type": "input", "position": { "x": 720, "y": 0, "w": 720, "h": 60 } },
+      { "item": "viz_audit_storage_success", "type": "block", "position": { "x": 0, "y": 70, "w": 720, "h": 400 } },
+      { "item": "viz_audit_storage_failure", "type": "block", "position": { "x": 720, "y": 70, "w": 720, "h": 400 } },
+      { "item": "viz_audit_processing_success", "type": "block", "position": { "x": 0, "y": 480, "w": 720, "h": 400 } },
+      { "item": "viz_audit_processing_failure", "type": "block", "position": { "x": 720, "y": 480, "w": 720, "h": 400 } },
+      { "item": "viz_log_forwarding_failure", "type": "block", "position": { "x": 0, "y": 890, "w": 1440, "h": 380 } },
+      { "item": "viz_health_note", "type": "block", "position": { "x": 0, "y": 1280, "w": 1440, "h": 200 } }
+    ]
+  },
+  "title": "STIG - Audit Health",
+  "description": "Audit subsystem health across RHEL9 and Palo Alto.",
+  "defaults": {
+    "dataSources": {
+      "ds.search": { "options": { "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" } } }
+    }
+  }
+}
+]]></definition>
+</dashboard>

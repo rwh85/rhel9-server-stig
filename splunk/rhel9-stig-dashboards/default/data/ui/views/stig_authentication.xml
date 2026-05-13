@@ -1,0 +1,108 @@
+<dashboard version="2" theme="dark">
+  <label>STIG - Authentication Events</label>
+  <description>STIG-aligned Authentication events (Logon, Logoff) across RHEL9, Cisco, and Palo Alto sources.</description>
+  <definition><![CDATA[
+{
+  "visualizations": {
+    "viz_logon_success": {
+      "type": "splunk.table",
+      "title": "Logon — Success",
+      "dataSources": { "primary": "ds_logon_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_logon_failure": {
+      "type": "splunk.table",
+      "title": "Logon — Failure",
+      "dataSources": { "primary": "ds_logon_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_logoff_success": {
+      "type": "splunk.table",
+      "title": "Logoff — Success",
+      "dataSources": { "primary": "ds_logoff_success" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    },
+    "viz_logoff_failure": {
+      "type": "splunk.table",
+      "title": "Logoff — Failure",
+      "dataSources": { "primary": "ds_logoff_failure" },
+      "options": { "dataOverlayMode": "none", "count": 100, "drilldown": "row" }
+    }
+  },
+  "dataSources": {
+    "ds_logon_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_auth_logon_success_linux | append [| savedsearch stig_auth_logon_success_cisco] | append [| savedsearch stig_auth_logon_success_pan_admin] | append [| savedsearch stig_auth_logon_success_pan_gp] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Logon Success (all sources)"
+    },
+    "ds_logon_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_auth_logon_failure_linux | append [| savedsearch stig_auth_logon_failure_cisco] | append [| savedsearch stig_auth_logon_fail_pan_admin] | append [| savedsearch stig_auth_logon_fail_pan_gp] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Logon Failure (all sources)"
+    },
+    "ds_logoff_success": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_auth_logoff_success_linux | append [| savedsearch stig_auth_logoff_success_cisco] | append [| savedsearch stig_auth_logoff_pan_admin] | append [| savedsearch stig_auth_logoff_pan_gp] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Logoff Success (all sources)"
+    },
+    "ds_logoff_failure": {
+      "type": "ds.search",
+      "options": {
+        "query": "| savedsearch stig_auth_logoff_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
+      },
+      "name": "Logoff Failure (linux only)"
+    }
+  },
+  "inputs": {
+    "input_time": {
+      "type": "input.timerange",
+      "title": "Time Range",
+      "options": { "token": "global_time", "defaultValue": "-24h@h,now" }
+    },
+    "input_source": {
+      "type": "input.dropdown",
+      "title": "Source",
+      "options": {
+        "token": "source_filter",
+        "defaultValue": "*",
+        "items": [
+          { "label": "All", "value": "*" },
+          { "label": "linux", "value": "linux" },
+          { "label": "cisco", "value": "cisco" },
+          { "label": "paloalto", "value": "paloalto" }
+        ]
+      }
+    }
+  },
+  "layout": {
+    "type": "absolute",
+    "options": { "width": 1440, "height": 900, "display": "auto" },
+    "structure": [
+      { "item": "input_time", "type": "input", "position": { "x": 0, "y": 0, "w": 720, "h": 60 } },
+      { "item": "input_source", "type": "input", "position": { "x": 720, "y": 0, "w": 720, "h": 60 } },
+      { "item": "viz_logon_success", "type": "block", "position": { "x": 0, "y": 70, "w": 720, "h": 400 } },
+      { "item": "viz_logon_failure", "type": "block", "position": { "x": 720, "y": 70, "w": 720, "h": 400 } },
+      { "item": "viz_logoff_success", "type": "block", "position": { "x": 0, "y": 480, "w": 720, "h": 400 } },
+      { "item": "viz_logoff_failure", "type": "block", "position": { "x": 720, "y": 480, "w": 720, "h": 400 } }
+    ]
+  },
+  "title": "STIG - Authentication Events",
+  "description": "Authentication events across RHEL9, Cisco, Palo Alto.",
+  "defaults": {
+    "dataSources": {
+      "ds.search": { "options": { "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" } } }
+    }
+  }
+}
+]]></definition>
+</dashboard>
