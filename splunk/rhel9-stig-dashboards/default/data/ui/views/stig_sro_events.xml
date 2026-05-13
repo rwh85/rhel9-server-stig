@@ -179,7 +179,7 @@
     "input_time": {
       "type": "input.timerange",
       "title": "Time Range",
-      "options": { "token": "global_time", "defaultValue": { "earliest": "-24h@h", "latest": "now" } }
+      "options": { "token": "global_time", "defaultValue": "-24h@h,now" }
     },
     "input_source": {
       "type": "input.dropdown",
