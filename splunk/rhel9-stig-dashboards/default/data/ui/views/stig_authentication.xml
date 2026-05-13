@@ -33,7 +33,7 @@
     "ds_logon_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_auth_logon_success_linux | append [| savedsearch stig_auth_logon_success_cisco] | append [| savedsearch stig_auth_logon_success_pan_admin] | append [| savedsearch stig_auth_logon_success_pan_gp] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_auth_logon_success_linux | append [| savedsearch stig_auth_logon_success_cisco] | append [| savedsearch stig_auth_logon_success_pan_admin] | append [| savedsearch stig_auth_logon_success_pan_gp] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Logon Success (all sources)"
@@ -41,7 +41,7 @@
     "ds_logon_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_auth_logon_failure_linux | append [| savedsearch stig_auth_logon_failure_cisco] | append [| savedsearch stig_auth_logon_fail_pan_admin] | append [| savedsearch stig_auth_logon_fail_pan_gp] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_auth_logon_failure_linux | append [| savedsearch stig_auth_logon_failure_cisco] | append [| savedsearch stig_auth_logon_fail_pan_admin] | append [| savedsearch stig_auth_logon_fail_pan_gp] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Logon Failure (all sources)"
@@ -49,7 +49,7 @@
     "ds_logoff_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_auth_logoff_success_linux | append [| savedsearch stig_auth_logoff_success_cisco] | append [| savedsearch stig_auth_logoff_pan_admin] | append [| savedsearch stig_auth_logoff_pan_gp] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_auth_logoff_success_linux | append [| savedsearch stig_auth_logoff_success_cisco] | append [| savedsearch stig_auth_logoff_pan_admin] | append [| savedsearch stig_auth_logoff_pan_gp] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Logoff Success (all sources)"
@@ -57,7 +57,7 @@
     "ds_logoff_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_auth_logoff_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_auth_logoff_failure_linux | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Logoff Failure (linux only)"
@@ -67,7 +67,7 @@
     "input_time": {
       "type": "input.timerange",
       "title": "Time Range",
-      "options": { "token": "global_time", "defaultValue": "-24h@h,now" }
+      "options": { "token": "global_time", "defaultValue": { "earliest": "-24h@h", "latest": "now" } }
     },
     "input_source": {
       "type": "input.dropdown",

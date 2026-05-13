@@ -47,7 +47,7 @@
     "ds_audit_storage_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_health_audit_storage_warning_linux | append [| savedsearch stig_health_disk_usage_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_health_audit_storage_warning_linux | append [| savedsearch stig_health_disk_usage_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Audit Storage Warning (linux + pan)"
@@ -55,7 +55,7 @@
     "ds_audit_processing_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_health_audit_processing_failure_linux | append [| savedsearch stig_health_audit_processing_fail_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_health_audit_processing_failure_linux | append [| savedsearch stig_health_audit_processing_fail_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Audit Processing Failure (linux + pan)"
@@ -63,7 +63,7 @@
     "ds_log_forwarding_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_health_log_forwarding_fail_pan | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_health_log_forwarding_fail_pan | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Log Forwarding Failure (pan only)"
@@ -73,7 +73,7 @@
     "input_time": {
       "type": "input.timerange",
       "title": "Time Range",
-      "options": { "token": "global_time", "defaultValue": "-24h@h,now" }
+      "options": { "token": "global_time", "defaultValue": { "earliest": "-24h@h", "latest": "now" } }
     },
     "input_source": {
       "type": "input.dropdown",

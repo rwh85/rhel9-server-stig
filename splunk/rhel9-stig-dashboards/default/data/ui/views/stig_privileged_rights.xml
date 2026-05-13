@@ -130,7 +130,7 @@
     "ds_audit_policy_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_priv_audit_policy_change_success_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_priv_audit_policy_change_success_linux | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Audit Policy Change Success"
@@ -138,7 +138,7 @@
     "ds_audit_policy_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_priv_audit_policy_change_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_priv_audit_policy_change_failure_linux | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Audit Policy Change Failure"
@@ -146,7 +146,7 @@
     "ds_mac_policy_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_priv_mac_policy_change_success_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_priv_mac_policy_change_success_linux | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "MAC Policy Change Success"
@@ -154,7 +154,7 @@
     "ds_mac_policy_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_priv_mac_policy_change_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_priv_mac_policy_change_failure_linux | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "MAC Policy Change Failure"
@@ -162,7 +162,7 @@
     "ds_security_policy_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_priv_policy_change_success_pan | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_priv_policy_change_success_pan | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "PAN Security/Audit Policy Change Success"
@@ -170,7 +170,7 @@
     "ds_security_policy_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_priv_policy_change_fail_pan | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_priv_policy_change_fail_pan | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "PAN Security/Audit Policy Change Failure"
@@ -178,7 +178,7 @@
     "ds_config_change_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_priv_config_change_success_linux | append [| savedsearch stig_priv_config_change_success_cisco] | append [| savedsearch stig_priv_config_commit_success_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_priv_config_change_success_linux | append [| savedsearch stig_priv_config_change_success_cisco] | append [| savedsearch stig_priv_config_commit_success_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Config Change Success (all sources)"
@@ -186,7 +186,7 @@
     "ds_config_change_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_priv_config_change_failure_linux | append [| savedsearch stig_priv_config_change_failure_cisco] | append [| savedsearch stig_priv_config_commit_fail_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_priv_config_change_failure_linux | append [| savedsearch stig_priv_config_change_failure_cisco] | append [| savedsearch stig_priv_config_commit_fail_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Config Change Failure (all sources)"
@@ -194,7 +194,7 @@
     "ds_root_access_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_priv_root_access_success_linux | append [| savedsearch stig_priv_root_access_success_cisco] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_priv_root_access_success_linux | append [| savedsearch stig_priv_root_access_success_cisco] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Root Access Success (linux + cisco)"
@@ -202,7 +202,7 @@
     "ds_root_access_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_priv_root_access_failure_linux | append [| savedsearch stig_priv_root_access_failure_cisco] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_priv_root_access_failure_linux | append [| savedsearch stig_priv_root_access_failure_cisco] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Root Access Failure (linux + cisco)"
@@ -210,7 +210,7 @@
     "ds_escalation_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_priv_escalation_success_linux | append [| savedsearch stig_priv_escalation_success_cisco] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_priv_escalation_success_linux | append [| savedsearch stig_priv_escalation_success_cisco] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Privilege Escalation Success (linux + cisco)"
@@ -218,7 +218,7 @@
     "ds_escalation_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_priv_escalation_failure_linux | append [| savedsearch stig_priv_escalation_failure_cisco] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_priv_escalation_failure_linux | append [| savedsearch stig_priv_escalation_failure_cisco] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Privilege Escalation Failure (linux + cisco)"
@@ -226,7 +226,7 @@
     "ds_audit_log_access_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_priv_audit_log_access_success_linux | append [| savedsearch stig_priv_audit_log_access_cisco] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_priv_audit_log_access_success_linux | append [| savedsearch stig_priv_audit_log_access_cisco] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Audit Log Access Success (linux + cisco)"
@@ -234,7 +234,7 @@
     "ds_audit_log_access_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_priv_audit_log_access_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_priv_audit_log_access_failure_linux | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Audit Log Access Failure (linux only)"
@@ -242,7 +242,7 @@
     "ds_reboot_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_priv_system_boot_success_linux | append [| savedsearch stig_priv_system_reboot_success_cisco] | append [| savedsearch stig_priv_system_reboot_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_priv_system_boot_success_linux | append [| savedsearch stig_priv_system_reboot_success_cisco] | append [| savedsearch stig_priv_system_reboot_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Reboot / Shutdown Success (all sources)"
@@ -250,7 +250,7 @@
     "ds_reboot_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_priv_system_boot_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_priv_system_boot_failure_linux | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Reboot / Shutdown Failure (linux only)"
@@ -258,7 +258,7 @@
     "ds_password_reset_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_priv_password_reset_success_linux | append [| savedsearch stig_priv_password_reset_success_cisco] | append [| savedsearch stig_priv_password_reset_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_priv_password_reset_success_linux | append [| savedsearch stig_priv_password_reset_success_cisco] | append [| savedsearch stig_priv_password_reset_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Password Reset Success (all sources)"
@@ -266,7 +266,7 @@
     "ds_password_reset_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_priv_password_reset_failure_linux | append [| savedsearch stig_priv_password_reset_failure_cisco] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_priv_password_reset_failure_linux | append [| savedsearch stig_priv_password_reset_failure_cisco] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Password Reset Failure (linux + cisco)"
@@ -274,7 +274,7 @@
     "ds_account_unlock_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_priv_account_lockout_pan | append [| savedsearch stig_priv_account_unlock_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_priv_account_lockout_pan | append [| savedsearch stig_priv_account_unlock_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "PAN Account Lockout / Unlock Success"
@@ -284,7 +284,7 @@
     "input_time": {
       "type": "input.timerange",
       "title": "Time Range",
-      "options": { "token": "global_time", "defaultValue": "-24h@h,now" }
+      "options": { "token": "global_time", "defaultValue": { "earliest": "-24h@h", "latest": "now" } }
     },
     "input_source": {
       "type": "input.dropdown",

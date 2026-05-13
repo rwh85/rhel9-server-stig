@@ -81,7 +81,7 @@
     "ds_sro_create_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_sro_create_success_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_sro_create_success_linux | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "SRO Create Success"
@@ -89,7 +89,7 @@
     "ds_sro_create_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_sro_create_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_sro_create_failure_linux | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "SRO Create Failure"
@@ -97,7 +97,7 @@
     "ds_sro_access_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_sro_access_success_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_sro_access_success_linux | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "SRO Access Success"
@@ -105,7 +105,7 @@
     "ds_sro_access_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_sro_access_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_sro_access_failure_linux | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "SRO Access Failure"
@@ -113,7 +113,7 @@
     "ds_sro_delete_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_sro_delete_success_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_sro_delete_success_linux | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "SRO Delete Success"
@@ -121,7 +121,7 @@
     "ds_sro_delete_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_sro_delete_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_sro_delete_failure_linux | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "SRO Delete Failure"
@@ -129,7 +129,7 @@
     "ds_sro_modify_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_sro_modify_success_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_sro_modify_success_linux | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "SRO Modify Success"
@@ -137,7 +137,7 @@
     "ds_sro_modify_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_sro_modify_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_sro_modify_failure_linux | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "SRO Modify Failure"
@@ -145,7 +145,7 @@
     "ds_sro_perm_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_sro_perm_modify_success_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_sro_perm_modify_success_linux | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "SRO Perm Modify Success"
@@ -153,7 +153,7 @@
     "ds_sro_perm_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_sro_perm_modify_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_sro_perm_modify_failure_linux | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "SRO Perm Modify Failure"
@@ -161,7 +161,7 @@
     "ds_sro_owner_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_sro_owner_modify_success_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_sro_owner_modify_success_linux | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "SRO Owner Modify Success"
@@ -169,7 +169,7 @@
     "ds_sro_owner_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_sro_owner_modify_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_sro_owner_modify_failure_linux | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "SRO Owner Modify Failure"
@@ -179,7 +179,7 @@
     "input_time": {
       "type": "input.timerange",
       "title": "Time Range",
-      "options": { "token": "global_time", "defaultValue": "-24h@h,now" }
+      "options": { "token": "global_time", "defaultValue": { "earliest": "-24h@h", "latest": "now" } }
     },
     "input_source": {
       "type": "input.dropdown",

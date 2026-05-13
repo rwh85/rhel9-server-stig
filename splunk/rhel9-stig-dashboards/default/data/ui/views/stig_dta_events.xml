@@ -33,7 +33,7 @@
     "ds_dta_export_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_dta_external_media_write_success_linux | append [| savedsearch stig_dta_export_success_cisco] | append [| savedsearch stig_dta_config_export_success_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_dta_external_media_write_success_linux | append [| savedsearch stig_dta_export_success_cisco] | append [| savedsearch stig_dta_config_export_success_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "DTA Export Success (all sources)"
@@ -41,7 +41,7 @@
     "ds_dta_export_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_dta_external_media_write_failure_linux | append [| savedsearch stig_dta_export_failure_cisco] | append [| savedsearch stig_dta_config_export_fail_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_dta_external_media_write_failure_linux | append [| savedsearch stig_dta_export_failure_cisco] | append [| savedsearch stig_dta_config_export_fail_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "DTA Export Failure (all sources)"
@@ -49,7 +49,7 @@
     "ds_dta_import_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_dta_external_media_read_success_linux | append [| savedsearch stig_dta_import_success_cisco] | append [| savedsearch stig_dta_config_import_success_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_dta_external_media_read_success_linux | append [| savedsearch stig_dta_import_success_cisco] | append [| savedsearch stig_dta_config_import_success_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "DTA Import Success (all sources)"
@@ -57,7 +57,7 @@
     "ds_dta_import_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_dta_import_failure_cisco | append [| savedsearch stig_dta_config_import_fail_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_dta_import_failure_cisco | append [| savedsearch stig_dta_config_import_fail_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "DTA Import Failure (cisco + pan; no linux signal)"
@@ -67,7 +67,7 @@
     "input_time": {
       "type": "input.timerange",
       "title": "Time Range",
-      "options": { "token": "global_time", "defaultValue": "-24h@h,now" }
+      "options": { "token": "global_time", "defaultValue": { "earliest": "-24h@h", "latest": "now" } }
     },
     "input_source": {
       "type": "input.dropdown",

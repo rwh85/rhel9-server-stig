@@ -69,7 +69,7 @@
     "ds_account_create_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_account_create_success_linux | append [| savedsearch stig_account_add_success_cisco] | append [| savedsearch stig_account_create_success_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_account_create_success_linux | append [| savedsearch stig_account_add_success_cisco] | append [| savedsearch stig_account_create_success_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Account Create Success (all sources)"
@@ -77,7 +77,7 @@
     "ds_account_create_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_account_create_failure_linux | append [| savedsearch stig_account_add_failure_cisco] | append [| savedsearch stig_account_create_fail_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_account_create_failure_linux | append [| savedsearch stig_account_add_failure_cisco] | append [| savedsearch stig_account_create_fail_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Account Create Failure (all sources)"
@@ -85,7 +85,7 @@
     "ds_account_modify_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_account_modify_success_linux | append [| savedsearch stig_account_modify_success_cisco] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_account_modify_success_linux | append [| savedsearch stig_account_modify_success_cisco] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Account Modify Success (linux + cisco)"
@@ -93,7 +93,7 @@
     "ds_account_modify_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_account_modify_failure_linux | append [| savedsearch stig_account_modify_failure_cisco] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_account_modify_failure_linux | append [| savedsearch stig_account_modify_failure_cisco] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Account Modify Failure (linux + cisco)"
@@ -101,7 +101,7 @@
     "ds_account_disable_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_account_disable_success_linux | append [| savedsearch stig_account_disable_success_cisco] | append [| savedsearch stig_account_disable_success_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_account_disable_success_linux | append [| savedsearch stig_account_disable_success_cisco] | append [| savedsearch stig_account_disable_success_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Account Disable Success (all sources)"
@@ -109,7 +109,7 @@
     "ds_account_disable_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_account_disable_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_account_disable_failure_linux | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Account Disable Failure (linux only)"
@@ -117,7 +117,7 @@
     "ds_account_enable_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_account_enable_success_linux | append [| savedsearch stig_account_enable_success_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_account_enable_success_linux | append [| savedsearch stig_account_enable_success_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Account Enable Success (linux + pan)"
@@ -125,7 +125,7 @@
     "ds_account_enable_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_account_enable_failure_linux | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_account_enable_failure_linux | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Account Enable Failure (linux only)"
@@ -133,7 +133,7 @@
     "ds_account_delete_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_account_delete_success_linux | append [| savedsearch stig_account_delete_success_cisco] | append [| savedsearch stig_account_delete_success_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_account_delete_success_linux | append [| savedsearch stig_account_delete_success_cisco] | append [| savedsearch stig_account_delete_success_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Account Delete Success (all sources)"
@@ -141,7 +141,7 @@
     "ds_account_delete_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_account_delete_failure_linux | append [| savedsearch stig_account_delete_failure_cisco] | append [| savedsearch stig_account_delete_fail_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_account_delete_failure_linux | append [| savedsearch stig_account_delete_failure_cisco] | append [| savedsearch stig_account_delete_fail_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Account Delete Failure (all sources)"
@@ -151,7 +151,7 @@
     "input_time": {
       "type": "input.timerange",
       "title": "Time Range",
-      "options": { "token": "global_time", "defaultValue": "-24h@h,now" }
+      "options": { "token": "global_time", "defaultValue": { "earliest": "-24h@h", "latest": "now" } }
     },
     "input_source": {
       "type": "input.dropdown",

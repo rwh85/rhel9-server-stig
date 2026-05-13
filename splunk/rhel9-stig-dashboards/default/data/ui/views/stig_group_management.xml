@@ -57,7 +57,7 @@
     "ds_group_create_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_group_create_success_linux | append [| savedsearch stig_groupmgmt_add_success_cisco] | append [| savedsearch stig_groupmgmt_role_create_success_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_group_create_success_linux | append [| savedsearch stig_groupmgmt_add_success_cisco] | append [| savedsearch stig_groupmgmt_role_create_success_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Group/Role Create Success (all sources)"
@@ -65,7 +65,7 @@
     "ds_group_create_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_group_create_failure_linux | append [| savedsearch stig_groupmgmt_add_failure_cisco] | append [| savedsearch stig_groupmgmt_role_create_fail_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_group_create_failure_linux | append [| savedsearch stig_groupmgmt_add_failure_cisco] | append [| savedsearch stig_groupmgmt_role_create_fail_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Group/Role Create Failure (all sources)"
@@ -73,7 +73,7 @@
     "ds_group_modify_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_group_modify_success_linux | append [| savedsearch stig_groupmgmt_modify_success_cisco] | append [| savedsearch stig_groupmgmt_role_create_success_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_group_modify_success_linux | append [| savedsearch stig_groupmgmt_modify_success_cisco] | append [| savedsearch stig_groupmgmt_role_create_success_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Group/Role Modify Success (linux + cisco + pan)"
@@ -81,7 +81,7 @@
     "ds_group_modify_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_group_modify_failure_linux | append [| savedsearch stig_groupmgmt_role_create_fail_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_group_modify_failure_linux | append [| savedsearch stig_groupmgmt_role_create_fail_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Group/Role Modify Failure (linux + pan; cisco N/A)"
@@ -89,7 +89,7 @@
     "ds_group_delete_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_group_delete_success_linux | append [| savedsearch stig_groupmgmt_delete_success_cisco] | append [| savedsearch stig_groupmgmt_role_delete_success_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_group_delete_success_linux | append [| savedsearch stig_groupmgmt_delete_success_cisco] | append [| savedsearch stig_groupmgmt_role_delete_success_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Group/Role Delete Success (all sources)"
@@ -97,7 +97,7 @@
     "ds_group_delete_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_group_delete_failure_linux | append [| savedsearch stig_groupmgmt_delete_failure_cisco] | append [| savedsearch stig_groupmgmt_role_delete_fail_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_group_delete_failure_linux | append [| savedsearch stig_groupmgmt_delete_failure_cisco] | append [| savedsearch stig_groupmgmt_role_delete_fail_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Group/Role Delete Failure (all sources)"
@@ -105,7 +105,7 @@
     "ds_membership_success": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_group_membership_change_success_linux | append [| savedsearch stig_groupmgmt_user_role_assign_success_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_group_membership_change_success_linux | append [| savedsearch stig_groupmgmt_user_role_assign_success_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Membership Change Success (linux + pan)"
@@ -113,7 +113,7 @@
     "ds_membership_failure": {
       "type": "ds.search",
       "options": {
-        "query": "| savedsearch stig_group_membership_change_failure_linux | append [| savedsearch stig_groupmgmt_user_role_assign_fail_pan] | search source_type=$source_filter:value$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
+        "query": "| savedsearch stig_group_membership_change_failure_linux | append [| savedsearch stig_groupmgmt_user_role_assign_fail_pan] | search source_type=$source_filter$ | table _time event_category event_action source_host source_type outcome user details | sort -_time",
         "queryParameters": { "earliest": "$global_time.earliest$", "latest": "$global_time.latest$" }
       },
       "name": "Membership Change Failure (linux + pan)"
@@ -123,7 +123,7 @@
     "input_time": {
       "type": "input.timerange",
       "title": "Time Range",
-      "options": { "token": "global_time", "defaultValue": "-24h@h,now" }
+      "options": { "token": "global_time", "defaultValue": { "earliest": "-24h@h", "latest": "now" } }
     },
     "input_source": {
       "type": "input.dropdown",
